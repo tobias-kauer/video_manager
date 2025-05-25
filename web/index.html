@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="text-screen">✨ Press ENTER to Record ✨</div>
+    <div id="video-container" style="display:none;">
+      <img id="live-view" width="100%" />
+    </div>
+
+    <script type="text/javascript" src="eel.js"></script>
+
+    <script type="text/javascript">
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          console.log("Enter key pressed");
+          document.getElementById('text-screen').style.display = 'none';
+          document.getElementById('video-container').style.display = 'block';
+          eel.record_data(); // Trigger Python side
+        }
+      });
+  
+      // Update the live view with frames from Python
+    eel.expose(update_live_view);
+    function update_live_view(frame_data) {
+      const img = document.getElementById('live-view');
+      img.src = "data:image/jpeg;base64," + frame_data;
+    }
+  
+      // Handle when recording is done
+      eel.expose(on_record_done);
+      function on_record_done(filename) {
+        console.log("Recording finished: " + filename);
+        document.getElementById('video-container').style.display = 'none';
+        document.getElementById('text-screen').style.display = 'flex';
+      }
+    </script>
+  
+</body>
+</html>
