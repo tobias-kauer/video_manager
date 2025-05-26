@@ -1,6 +1,7 @@
 import time
 import os
 import eel
+import subprocess
 import cv2
 import uuid
 import threading
@@ -45,6 +46,25 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
         cap = cv2.VideoCapture(CAMERA)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
+
+        time.sleep(1.0)
+
+        # Set exposure via v4l2-ctl AFTER VideoCapture is opened
+        # Set manual exposure after camera is opened
+        subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'auto_exposure=1'])  # Manual mode
+        subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'exposure_time_absolute=200'])  # Set value
+
+
+        # Try to disable auto exposure (this may vary by platform)
+        # For many webcams, 0.25 = manual mode, 0.75 = auto mode
+        #cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)  # May not work on all platforms
+
+        # Set manual exposure value (negative values often used on webcams)
+        # Try values like -4, -6, or positive ones like 100 depending on your hardware
+        #cap.set(cv2.CAP_PROP_EXPOSURE, -4)
+
+        print("Auto Exposure:", cap.get(cv2.CAP_PROP_AUTO_EXPOSURE))
+        print("Exposure:", cap.get(cv2.CAP_PROP_EXPOSURE))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out = cv2.VideoWriter(file_path, fourcc, 20.0, resolution)

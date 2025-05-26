@@ -86,8 +86,8 @@ def process_frames(uuid):
 sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()'''
 
-#eel.start('index.html', size=(800, 600), block=False)
-eel.start('three.html', size=(800, 600), block=False)
+eel.start('index.html', size=(800, 600), block=False)
+#eel.start('three.html', size=(800, 600), block=False)
 
 # Keep the app running
 while True:
