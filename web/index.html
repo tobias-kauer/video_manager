@@ -8,6 +8,10 @@
 <body>
     <div id="text-screen">✨ Press ENTER to Record ✨</div>
     <div id="video-container" style="display:none;">
+      <div id="countdown-container">
+        <span id="countdown-timer"></span>
+        <span id="blinking-dot" class="text-md" style="display:inline-block; width:20px; height:20px; background-color:red; border-radius:50%; margin-left:10px;"></span>
+      </div>
       <img id="live-view" width="100%" />
     </div>
 
@@ -20,8 +24,39 @@
           document.getElementById('text-screen').style.display = 'none';
           document.getElementById('video-container').style.display = 'block';
           eel.record_data(); // Trigger Python side
+          startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
         }
       });
+
+    // Function to start the countdown
+    function startCountdown(duration) {
+      const countdownTimer = document.getElementById('countdown-timer');
+      const blinkingDot = document.getElementById('blinking-dot');
+      let remainingTime = duration;
+
+      // Update the countdown timer every second
+      const countdownInterval = setInterval(() => {
+        countdownTimer.textContent = `Recording: ${remainingTime}s`;
+        remainingTime--;
+
+        if (remainingTime < 0) {
+          clearInterval(countdownInterval); // Stop the countdown when it reaches 0
+          countdownTimer.textContent = ""; // Clear the countdown text
+          blinkingDot.style.display = "none"; // Hide the blinking dot
+        }
+      }, 1000);
+
+      // Make the red dot blink
+      let isDotVisible = true;
+      const blinkingInterval = setInterval(() => {
+        if (remainingTime < 0) {
+          clearInterval(blinkingInterval); // Stop blinking when the countdown ends
+        } else {
+          isDotVisible = !isDotVisible;
+          blinkingDot.style.opacity = isDotVisible ? "1" : "0"; // Toggle visibility
+        }
+      }, 500); // Blink every 500ms
+    }
   
       // Update the live view with frames from Python
     eel.expose(update_live_view);
@@ -32,11 +67,15 @@
   
       // Handle when recording is done
       eel.expose(on_record_done);
-      function on_record_done(filename) {
-        console.log("Recording finished: " + filename);
+      function on_record_done(uuid) {
+        console.log("Recording finished: " + uuid);
         document.getElementById('video-container').style.display = 'none';
         document.getElementById('text-screen').style.display = 'flex';
+
+        eel.process_frames(uuid)
+        
       }
+
     </script>
   
 </body>

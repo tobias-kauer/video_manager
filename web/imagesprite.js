@@ -11,7 +11,7 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 
 // Set up basic scene properties
 
-const scale = 1;
+const scale = 0.5;
 const speed = 0.002;
 const maxPoints = 1000;
 const selectedFile = 'pca_output.json';
@@ -58,10 +58,10 @@ function animate() {
 }*/
 
 // Animation loop
-let zoomingIn = false;
-let zoomingOut = false;
-let zoomTarget = 5; // Target zoom level when zooming in
-let zoomSpeed = 0.1; // Speed of zooming
+let movingForward = false;
+let movingBackward = false;
+let moveTarget = 2; // Target position when moving forward
+let moveSpeed = 0.01; // Speed of movement
 
 // Animation loop
 function animate() {
@@ -70,33 +70,34 @@ function animate() {
     // Rotate the group (globe)
     group.rotation.y += speed;
   
-    // Handle zooming in
-    if (zoomingIn && camera.position.z > zoomTarget) {
-      camera.position.z -= zoomSpeed;
-      if (camera.position.z <= zoomTarget) {
-        zoomingIn = false;
-        zoomingOut = true; // Start zooming out
-      }
+    // Handle moving forward
+    if (movingForward && camera.position.z > moveTarget) {
+        camera.position.z -= moveSpeed;
+        if (camera.position.z <= moveTarget) {
+            movingForward = false;
+            movingBackward = true; // Start moving backward
+        }
     }
   
-    // Handle zooming out
-    if (zoomingOut && camera.position.z < 10) {
-      camera.position.z += zoomSpeed;
-      if (camera.position.z >= 10) {
-        zoomingOut = false; // Stop zooming out
-      }
+    // Handle moving backward
+    if (movingBackward && camera.position.z < 10) {
+        camera.position.z += moveSpeed;
+        if (camera.position.z >= 10) {
+            movingBackward = false; // Stop moving backward
+        }
     }
   
     renderer.render(scene, camera);
-  }
+}
   
 animate();
 
+// Add event listener for "Enter" key to start moving forward
 document.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
+  if (event.key === 'Enter') {
       console.log('Enter key pressed');
-      zoomingIn = true; // Start zooming in
-      zoomingOut = false; // Ensure we don't zoom out immediately
-    }
-  });
+      movingForward = true; // Start moving forward
+      movingBackward = false; // Ensure we don't move backward immediately
+  }
+});
 

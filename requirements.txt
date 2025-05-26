@@ -1,0 +1,14 @@
+bottle==0.13.3
+bottle-websocket==0.2.9
+Eel==0.18.1
+future==1.0.0
+gevent==25.5.1
+gevent-websocket==0.10.1
+greenlet==3.2.2
+numpy==2.2.6
+opencv-python==4.11.0.86
+pillow==11.2.1
+pyparsing==3.2.3
+typing_extensions==4.13.2
+zope.event==5.0
+zope.interface==7.2
