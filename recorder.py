@@ -7,6 +7,9 @@ import threading
 import base64
 import numpy as np
 
+#source .venv/bin/activate
+#pip freeze > requirements.txt
+
 CAMERA = 0  # Default camera index (0 for the first camera)
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -78,7 +81,7 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
 
         print(f"Video saved as: {filename}")
         print(f"Frames saved in folder: {frame_folder}")
-        eel.on_record_done(filename)  # Notify the browser that recording is done
+        eel.on_record_done(uuid_str)  # Notify the browser that recording is done
 
         return file_path, uuid_str
 

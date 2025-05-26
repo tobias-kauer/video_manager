@@ -16,6 +16,27 @@ body, html {
     font-size: 3em;
     animation: pulse 2s infinite;
   }
+
+
+
+  #countdown-container {
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+
+  #blinking-dot {
+    animation: blink 1s infinite;
+  }
+
+  @keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+  }
   
   @keyframes pulse {
     0%   { opacity: 0.3; }
