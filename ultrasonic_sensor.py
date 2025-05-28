@@ -1,7 +1,8 @@
 import time
 from gpiozero import DistanceSensor
 import random
-import keyboard 
+import threading
+import queue
 
 class UltrasonicSensor:
     def __init__(self, trigger_pin, echo_pin, name="Sensor"):
@@ -13,7 +14,7 @@ class UltrasonicSensor:
             echo_pin (int): GPIO pin connected to the echo.
             name (str): Optional name for the sensor (useful for debugging).
         """
-        #self.sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin)
+        self.sensor = DistanceSensor(echo=echo_pin, trigger=trigger_pin)
         self.name = name
 
     def get_distance(self):
@@ -50,11 +51,25 @@ class MockUltrasonicSensor:
             trigger_pin (int): Mock trigger pin (not used in mock).
             echo_pin (int): Mock echo pin (not used in mock).
             name (str): Name of the sensor.
-            trigger_key (str): The keyboard key to simulate an object within range.
+            trigger_key (str): The key to simulate an object within range.
         """
         self.name = name
         self.trigger_key = trigger_key
         self.mock_distance = random.uniform(10, 100)  # Initial random distance
+        #self.input_queue = queue.Queue()  # Queue to store user input
+        #self._start_input_listener()  # Start the input listener thread
+
+    def _start_input_listener(self):
+        """
+        Start a separate thread to listen for user input.
+        """
+        def listen_for_input():
+            while True:
+                user_input = input("Press a key to simulate sensor input: ").strip()
+                self.input_queue.put(user_input)
+
+        listener_thread = threading.Thread(target=listen_for_input, daemon=True)
+        listener_thread.start()
 
     def get_distance(self):
         """
@@ -78,9 +93,13 @@ class MockUltrasonicSensor:
         Returns:
             bool: True if an object is within the threshold or the trigger key is pressed.
         """
-        # Check if the trigger key is pressed
-        if keyboard.is_pressed(self.trigger_key):
-            print(f"{self.name}: Trigger key '{self.trigger_key}' pressed! Simulating object within range.")
-            return True
+        '''# Check if the trigger key was entered
+        while not self.input_queue.empty():
+            user_input = self.input_queue.get()
+            if user_input == self.trigger_key:
+                print(f"{self.name}: Trigger key '{self.trigger_key}' detected! Simulating object within range.")
+                return True
 
-        return False
+        # Otherwise, check the mock distance
+        distance_cm = self.get_distance()
+        return distance_cm <= threshold_cm'''
