@@ -5,7 +5,7 @@ from frame_processer import *
 from ultrasonic_sensor import *
 from mosfet import *
 from platform_manager import is_raspberry_pi
-
+from segment_display import *
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -15,24 +15,33 @@ VIDEO_LOCATION = "videos/"  # Directory to save videos
 SENSOR_CAMERA_THRESHOLD = 20  # cm
 SENSOR_ROOM_THRESHOLD = 90  # cm
 
+
+# GPIO pin configuration for the sensors and MOSFET
 CAMERA_SENSOR_TRIGGER_PIN = 23
 CAMERA_SENSOR_ECHO_PIN = 24
-ROOM_SENSOR_ThRIGGER_PIN = 25
+ROOM_SENSOR_TRIGGER_PIN = 25
 ROOM_SENSOR_ECHO_PIN = 26
 
-print("runnig")
+MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
+
 
 # Check if running on a Raspberry Pi
 if is_raspberry_pi():
-    print("Running on Raspberry Pi. Using real sensors.")
+    print("Running on Raspberry Pi. Using real sensors and devices.")
     sensorCamera = UltrasonicSensor(trigger_pin=CAMERA_SENSOR_TRIGGER_PIN, echo_pin=CAMERA_SENSOR_ECHO_PIN, name="Sensor Camera")
     sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_TRIGGER_PIN, name="Sensor Room")
+    mosfet = Mosfet(gpio_pin=MOSFET_GPIO_PIN)
+    segmentDisplay = SegmentDisplay()
+
 else:
-    print("Not running on Raspberry Pi. Using mock sensors.")
+    print("Not running on Raspberry Pi. Using mock sensors and devices.")
     sensorCamera = MockUltrasonicSensor(trigger_pin=23, echo_pin=24, name="Sensor Camera", trigger_key="space")
     sensorRoom = MockUltrasonicSensor(trigger_pin=25, echo_pin=26, name="Sensor Room", trigger_key="space")
- 
-print("Initializing Eel...")  # Should show up in terminal
+    mosfet = MockMosfet(gpio_pin=MOSFET_GPIO_PIN)
+    segmentDisplay = MockSegmentDisplay()
+
+print("Initializing Eel...")  # Starting EEl for the web interface
+
 eel.init('web')
  
 def monitor_sensors():
@@ -97,7 +106,6 @@ def process_frames(uuid):
 def trigger_animation():
     print("Animation triggered from Python!")
     eel.startAnimation()  # Calls the JS function
-
 
 
 # Start the sensor monitoring thread
