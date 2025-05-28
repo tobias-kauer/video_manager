@@ -3,6 +3,7 @@ import eel
 from recorder import *
 from frame_processer import *
 from ultrasonic_sensor import *
+from mosfet import *
 from platform_manager import is_raspberry_pi
 
 
@@ -16,8 +17,10 @@ SENSOR_ROOM_THRESHOLD = 90  # cm
 
 CAMERA_SENSOR_TRIGGER_PIN = 23
 CAMERA_SENSOR_ECHO_PIN = 24
-ROOM_SENSOR_TRIGGER_PIN = 25
+ROOM_SENSOR_ThRIGGER_PIN = 25
 ROOM_SENSOR_ECHO_PIN = 26
+
+print("runnig")
 
 # Check if running on a Raspberry Pi
 if is_raspberry_pi():
@@ -28,7 +31,7 @@ else:
     print("Not running on Raspberry Pi. Using mock sensors.")
     sensorCamera = MockUltrasonicSensor(trigger_pin=23, echo_pin=24, name="Sensor Camera", trigger_key="space")
     sensorRoom = MockUltrasonicSensor(trigger_pin=25, echo_pin=26, name="Sensor Room", trigger_key="space")
-
+ 
 print("Initializing Eel...")  # Should show up in terminal
 eel.init('web')
  
