@@ -8,6 +8,8 @@ import threading
 import base64
 import numpy as np
 
+from platform_manager import is_raspberry_pi
+
 #source .venv/bin/activate
 #pip freeze > requirements.txt
 
@@ -51,9 +53,10 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
 
         # Set exposure via v4l2-ctl AFTER VideoCapture is opened
         # Set manual exposure after camera is opened
-        subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'auto_exposure=1'])  # Manual mode
-        subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'exposure_time_absolute=200'])  # Set value
 
+        if is_raspberry_pi():
+            subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'auto_exposure=1'])  # Manual mode
+            subprocess.call(['v4l2-ctl', '-d', '/dev/video0', '-c', 'exposure_time_absolute=200'])  # Set value
 
         # Try to disable auto exposure (this may vary by platform)
         # For many webcams, 0.25 = manual mode, 0.75 = auto mode

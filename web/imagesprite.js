@@ -11,7 +11,7 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 
 // Set up basic scene properties
 
-const scale = 0.5;
+const scale = 0.4;
 const speed = 0.002;
 const maxPoints = 1000;
 const selectedFile = 'pca_output.json';
@@ -20,6 +20,9 @@ const group = new THREE.Group();
 scene.add(group);
 
 camera.position.z = 10;
+
+// Center the sprite group in the scene
+group.position.set(0, 0, 0);
 
 function loadSprites(data) {
   const loader = new THREE.TextureLoader();
@@ -56,6 +59,20 @@ function animate() {
   group.rotation.y += speed;
   renderer.render(scene, camera);
 }*/
+
+// Handle window resize
+function onWindowResize() {
+  // Update camera aspect ratio and projection matrix
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+
+  // Update renderer size
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Add event listener for window resize
+window.addEventListener('resize', onWindowResize, false);
+
 
 // Animation loop
 let movingForward = false;

@@ -3,6 +3,7 @@ import eel
 from recorder import *
 from frame_processer import *
 from ultrasonic_sensor import *
+from platform_manager import is_raspberry_pi
 
 
 RESOLUTION = (640, 480)  # Default resolution
@@ -13,30 +14,37 @@ VIDEO_LOCATION = "videos/"  # Directory to save videos
 SENSOR_CAMERA_THRESHOLD = 20  # cm
 SENSOR_ROOM_THRESHOLD = 90  # cm
 
-'''sensorCamera = UltrasonicSensor(trigger_pin=23, echo_pin=24, name="Sensor Camera")
-print(f"Ultrasonic Sensor initialized: {sensorCamera.name}")
+CAMERA_SENSOR_TRIGGER_PIN = 23
+CAMERA_SENSOR_ECHO_PIN = 24
+ROOM_SENSOR_TRIGGER_PIN = 25
+ROOM_SENSOR_ECHO_PIN = 26
 
-sensorRoom = UltrasonicSensor(trigger_pin=23, echo_pin=24, name="Sensor Room")
-print(f"Ultrasonic Sensor initialized: {sensorCamera.name}")'''
+# Check if running on a Raspberry Pi
+if is_raspberry_pi():
+    print("Running on Raspberry Pi. Using real sensors.")
+    sensorCamera = UltrasonicSensor(trigger_pin=CAMERA_SENSOR_TRIGGER_PIN, echo_pin=CAMERA_SENSOR_ECHO_PIN, name="Sensor Camera")
+    sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_TRIGGER_PIN, name="Sensor Room")
+else:
+    print("Not running on Raspberry Pi. Using mock sensors.")
+    sensorCamera = MockUltrasonicSensor(trigger_pin=23, echo_pin=24, name="Sensor Camera", trigger_key="space")
+    sensorRoom = MockUltrasonicSensor(trigger_pin=25, echo_pin=26, name="Sensor Room", trigger_key="space")
 
 print("Initializing Eel...")  # Should show up in terminal
 eel.init('web')
-
+ 
 def monitor_sensors():
     """
     Continuously monitor both sensors and trigger a function if a threshold is crossed.
     """
     while True:
-        distance1 = sensorCamera.get_distance()
-        distance2 = sensorRoom.get_distance()
 
-        if distance1 < SENSOR_CAMERA_THRESHOLD:
-            print(f"Sensor 1 triggered! Distance: {distance1:.2f} cm")
-            trigger_function(sensor_name="Sensor 1", distance=distance1)
+        if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
+            print(f"Sensor 1 triggered! Distance: cm")
+            trigger_function(sensor_name="Sensor 1", distance=1)
 
-        if distance2 < SENSOR_ROOM_THRESHOLD:
-            print(f"Sensor 2 triggered! Distance: {distance2:.2f} cm")
-            trigger_function(sensor_name="Sensor 2", distance=distance2)
+        if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD):
+            print(f"Sensor 2 triggered! Distance:  cm")
+            trigger_function(sensor_name="Sensor 2", distance=2)
 
         time.sleep(0.1)  # Adjust the polling interval as needed
 
@@ -82,12 +90,20 @@ def process_frames(uuid):
 
     return f"Data processed for UUID: {uuid}"
 
-'''# Start the sensor monitoring thread
-sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
-sensor_thread.start()'''
+@eel.expose
+def trigger_animation():
+    print("Animation triggered from Python!")
+    eel.startAnimation()  # Calls the JS function
 
-eel.start('index.html', size=(800, 600), block=False)
-#eel.start('three.html', size=(800, 600), block=False)
+
+
+# Start the sensor monitoring thread
+sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
+sensor_thread.start()
+
+eel.start('index.html', size=(800 , 600), block=False)
+#eel.start('three.html', size=(720, 1000), block=False)
+#eel.start('animation.html', size=(800, 600))
 
 # Keep the app running
 while True:

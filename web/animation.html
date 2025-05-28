@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GSAP + Eel Example</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #111;
+      color: white;
+    }
+    #text {
+      opacity: 0;
+      transform: translateY(50px);
+      font-size: 2rem;
+    }
+    #text2 {
+      opacity: 0;
+      transform: translateY(50px);
+      font-size: 2rem;
+    }
+  </style>
+</head>
+<body>
+    <script type="text/javascript" src="/eel.js"></script>
+  <div id="text">Hello from GSAP!</div>
+  <div id="text2">Second Text</div>
+
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Eel JS -->
+  
+  <script src="animation.js"></script>
+</body>
+</html>
