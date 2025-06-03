@@ -29,7 +29,7 @@ MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
 if is_raspberry_pi():
     print("Running on Raspberry Pi. Using real sensors and devices.")
     sensorCamera = UltrasonicSensor(trigger_pin=CAMERA_SENSOR_TRIGGER_PIN, echo_pin=CAMERA_SENSOR_ECHO_PIN, name="Sensor Camera")
-    sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_TRIGGER_PIN, name="Sensor Room")
+    #sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_TRIGGER_PIN, name="Sensor Room")
     mosfet = Mosfet(gpio_pin=MOSFET_GPIO_PIN)
     segmentDisplay = SegmentDisplay()
 
@@ -39,6 +39,10 @@ else:
     sensorRoom = MockUltrasonicSensor(trigger_pin=25, echo_pin=26, name="Sensor Room", trigger_key="space")
     mosfet = MockMosfet(gpio_pin=MOSFET_GPIO_PIN)
     segmentDisplay = MockSegmentDisplay()
+
+segmentDisplay.init_display()
+segmentDisplay.clear_display()
+segmentDisplay.display_number(124)
 
 print("Initializing Eel...")  # Starting EEl for the web interface
 
@@ -54,9 +58,7 @@ def monitor_sensors():
             print(f"Sensor 1 triggered! Distance: cm")
             trigger_function(sensor_name="Sensor 1", distance=1)
 
-        if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD):
-            print(f"Sensor 2 triggered! Distance:  cm")
-            trigger_function(sensor_name="Sensor 2", distance=2)
+        
 
         time.sleep(0.1)  # Adjust the polling interval as needed
 
@@ -112,8 +114,8 @@ def trigger_animation():
 sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
-#eel.start('index.html', size=(800 , 600), block=False)
-eel.start('three.html', size=(720, 1000), block=False)
+eel.start('index.html', size=(800 , 600), block=False)
+#eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
 # Keep the app running
