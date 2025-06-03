@@ -30,7 +30,7 @@ function loadSprites(data) {
 
   limitedSprites.forEach((item) => {
     loader.load(item.imageUrl, (texture) => {
-      texture.flipY = false; // Ensure texture is not flipped
+      texture.flipY = true; // Ensure texture is not flipped
       texture.encoding = THREE.sRGBEncoding; // Use sRGB color space for proper rendering
 
       const material = new THREE.SpriteMaterial({
