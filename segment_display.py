@@ -16,6 +16,8 @@ class SegmentDisplay:
         self.spi_disp.max_speed_hz = 1000000
         self.spi_disp.mode = 0
 
+        print("Display Initialized")
+
     def write_cmd(self, register, data):
         """
         Write a command to the display.
@@ -57,6 +59,7 @@ class SegmentDisplay:
                 self.write_cmd(i, int(number_str[i - 1]))
             else:
                 self.write_cmd(i, 0x0F)  # Blank
+
 
     def display_number(self, number):
         """
