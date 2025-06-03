@@ -112,8 +112,8 @@ def trigger_animation():
 sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
-eel.start('index.html', size=(800 , 600), block=False)
-#eel.start('three.html', size=(720, 1000), block=False)
+#eel.start('index.html', size=(800 , 600), block=False)
+eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
 # Keep the app running
