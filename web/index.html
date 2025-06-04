@@ -18,6 +18,18 @@
     <script type="text/javascript" src="eel.js"></script>
 
     <script type="text/javascript">
+
+      function startEvent() {
+          console.log("Event started!");
+          document.getElementById('text-screen').style.display = 'none';
+          document.getElementById('video-container').style.display = 'block';
+          eel.record_data(); // Trigger Python side
+          startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
+        }
+
+      // Expose the function to be called from Python
+      eel.expose(startEvent);
+
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Enter') {
           console.log("Enter key pressed");

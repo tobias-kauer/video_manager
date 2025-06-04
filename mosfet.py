@@ -115,3 +115,15 @@ class MockMosfet:
             off_time (int): Duration in seconds for the MOSFET to stay off.
         """
         print(f"MockMosfet: Simulating blink loop (ON: {on_time}s, OFF: {off_time}s).")
+
+    def set_pwm(self, percentage):
+        """
+        Simulate setting the MOSFET brightness to a specific percentage.
+
+        Args:
+            percentage (float): The brightness level as a percentage (0 to 100).
+        """
+        if not (0 <= percentage <= 100):
+            raise ValueError("Percentage must be between 0 and 100.")
+        
+        print(f"MockMosfet: Set to {percentage}% brightness (simulated).")
