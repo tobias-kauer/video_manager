@@ -24,6 +24,10 @@ ROOM_SENSOR_ECHO_PIN = 26
 
 MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
 
+# Flags for manual sensor triggering
+sensor_camera_manual_trigger = False
+sensor_room_manual_trigger = False
+
 
 # Check if running on a Raspberry Pi
 if is_raspberry_pi():
@@ -44,6 +48,12 @@ segmentDisplay.init_display()
 segmentDisplay.clear_display()
 segmentDisplay.display_number(124)
 
+# Initialize variables for debugging
+sensor_camera_value = 0
+sensor_room_value = 0
+last_display_value = 0
+lamp_brightness = 0
+
 print("Initializing Eel...")  # Starting EEl for the web interface
 
 eel.init('web')
@@ -52,15 +62,72 @@ def monitor_sensors():
     """
     Continuously monitor both sensors and trigger a function if a threshold is crossed.
     """
+
+    global sensor_camera_manual_trigger, sensor_room_manual_trigger
+
     while True:
 
-        if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
-            print(f"Sensor 1 triggered! Distance: cm")
-            trigger_function(sensor_name="Sensor 1", distance=1)
+        # Check if Sensor Camera is within range or manually triggered
+        if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
+            print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
+            trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
+            sensor_camera_manual_trigger = False  # Reset manual trigger flag
+
+        # Check if Sensor Room is within range or manually triggered
+        if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) or sensor_room_manual_trigger:
+            print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
+            trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
+            sensor_room_manual_trigger = False  # Reset manual trigger flag
 
         
 
         time.sleep(0.1)  # Adjust the polling interval as needed
+
+@eel.expose
+def get_debug_data():
+    """
+    Provide debug data to the frontend.
+    """
+    return {
+        "sensor_camera_value": sensor_camera_value,
+        "sensor_room_value": sensor_room_value,
+        "last_display_value": last_display_value,
+        "lamp_brightness": lamp_brightness,
+    }
+
+@eel.expose
+def set_display_value(value):
+    """
+    Set a value to the segment display and update the debug data.
+    """
+    global last_display_value
+    last_display_value = value
+    segmentDisplay.display_number(value)
+    print(f"Display updated with value: {value}")
+
+@eel.expose
+def set_lamp_brightness(percentage):
+    """
+    Set the brightness of the lamp and update the debug data.
+    """
+    global lamp_brightness
+    lamp_brightness = percentage
+    mosfet.set_pwm(percentage)
+    print(f"Lamp brightness set to: {percentage}%")
+
+@eel.expose
+def trigger_sensor(sensor_name):
+    """
+    Manually trigger a sensor for debugging.
+    """
+    global sensor_camera_manual_trigger, sensor_room_manual_trigger
+
+    if sensor_name == "Sensor Camera":
+        print("Manually triggered Sensor Camera")
+        sensor_camera_manual_trigger = True
+    elif sensor_name == "Sensor Room":
+        print("Manually triggered Sensor Room")
+        sensor_room_manual_trigger = True
 
 def trigger_function(sensor_name, distance):
     """
@@ -115,8 +182,9 @@ sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
 eel.start('index.html', size=(800 , 600), block=False)
-#eel.start('three.html', size=(720, 1000), block=False)
+eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
+eel.start('debug.html', size=(800, 600), block=False)
 
 # Keep the app running
 while True:
