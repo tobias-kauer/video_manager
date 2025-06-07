@@ -20,7 +20,8 @@ SENSOR_ROOM_THRESHOLD = 90  # cm
 CAMERA_SENSOR_TRIGGER_PIN = 23
 CAMERA_SENSOR_ECHO_PIN = 24
 ROOM_SENSOR_TRIGGER_PIN = 25
-ROOM_SENSOR_ECHO_PIN = 26
+ROOM_SENSOR_ECHO_PIN = 27
+
 
 MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
 
@@ -33,7 +34,7 @@ sensor_room_manual_trigger = False
 if is_raspberry_pi():
     print("Running on Raspberry Pi. Using real sensors and devices.")
     sensorCamera = UltrasonicSensor(trigger_pin=CAMERA_SENSOR_TRIGGER_PIN, echo_pin=CAMERA_SENSOR_ECHO_PIN, name="Sensor Camera")
-    #sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_TRIGGER_PIN, name="Sensor Room")
+    sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_ECHO_PIN, name="Sensor Room")
     mosfet = Mosfet(gpio_pin=MOSFET_GPIO_PIN)
     segmentDisplay = SegmentDisplay()
 
@@ -55,6 +56,8 @@ last_display_value = 0
 lamp_brightness = 0
 
 print("Initializing Eel...")  # Starting EEl for the web interface
+
+mosfet.set_pwm(80)  # Initialize MOSFET to 0% brightnes
 
 eel.init('web')
  
@@ -182,9 +185,9 @@ sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
 eel.start('index.html', size=(800 , 600), block=False)
-eel.start('three.html', size=(720, 1000), block=False)
+#eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
-eel.start('debug.html', size=(800, 600), block=False)
+#eel.start('debug.html', size=(800, 600), block=False)
 
 # Keep the app running
 while True:
