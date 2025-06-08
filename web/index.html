@@ -2,12 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Video Manager</title>
+  <title>Top-Screen Window</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="text-screen">✨ Press ENTER to Record ✨</div>
-    <div id="video-container" style="display:none;">
+
+    <div id="idle-animation">
+      <div id="idle-animation-1" style="display: none;">this is a fact about AI</div>
+      <div id="idle-animation-2" style="display: none;">
+        this is another fact about AI
+        <div id="scroll-container">
+          <ul id="scroll-list">
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+            <li>Item 5</li>
+            <li>Item 6</li>
+            <li>Item 7</li>
+            <li>Item 8</li>
+          </ul>
+        </div>
+      </div>
+      <div id="idle-animation-3" style="display: none;">and a last one</div>
+    </div>
+      
+    <div id="room-animation" style="display:none;">
+    
+    </div>
+
+    <div id="camera-animation" style="display:none;">
       <div id="countdown-container">
         <span id="countdown-timer"></span>
         <span id="blinking-dot" class="text-md" style="display:inline-block; width:20px; height:20px; background-color:red; border-radius:50%; margin-left:10px;"></span>
@@ -16,79 +41,12 @@
     </div>
 
     <script type="text/javascript" src="eel.js"></script>
+    <script type="text/javascript" src="video_recoder.js"></script>
 
-    <script type="text/javascript">
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
-      function startEvent() {
-          console.log("Event started!");
-          document.getElementById('text-screen').style.display = 'none';
-          document.getElementById('video-container').style.display = 'block';
-          eel.record_data(); // Trigger Python side
-          startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
-        }
-
-      // Expose the function to be called from Python
-      eel.expose(startEvent);
-
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter') {
-          console.log("Enter key pressed");
-          document.getElementById('text-screen').style.display = 'none';
-          document.getElementById('video-container').style.display = 'block';
-          eel.record_data(); // Trigger Python side
-          startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
-        }
-      });
-
-    // Function to start the countdown
-    function startCountdown(duration) {
-      const countdownTimer = document.getElementById('countdown-timer');
-      const blinkingDot = document.getElementById('blinking-dot');
-      let remainingTime = duration;
-
-      // Update the countdown timer every second
-      const countdownInterval = setInterval(() => {
-        countdownTimer.textContent = `Recording: ${remainingTime}s`;
-        remainingTime--;
-
-        if (remainingTime < 0) {
-          clearInterval(countdownInterval); // Stop the countdown when it reaches 0
-          countdownTimer.textContent = ""; // Clear the countdown text
-          blinkingDot.style.display = "none"; // Hide the blinking dot
-        }
-      }, 1000);
-
-      // Make the red dot blink
-      let isDotVisible = true;
-      const blinkingInterval = setInterval(() => {
-        if (remainingTime < 0) {
-          clearInterval(blinkingInterval); // Stop blinking when the countdown ends
-        } else {
-          isDotVisible = !isDotVisible;
-          blinkingDot.style.opacity = isDotVisible ? "1" : "0"; // Toggle visibility
-        }
-      }, 500); // Blink every 500ms
-    }
-  
-      // Update the live view with frames from Python
-    eel.expose(update_live_view);
-    function update_live_view(frame_data) {
-      const img = document.getElementById('live-view');
-      img.src = "data:image/jpeg;base64," + frame_data;
-    }
-  
-      // Handle when recording is done
-      eel.expose(on_record_done);
-      function on_record_done(uuid) {
-        console.log("Recording finished: " + uuid);
-        document.getElementById('video-container').style.display = 'none';
-        document.getElementById('text-screen').style.display = 'flex';
-
-        eel.process_frames(uuid)
-        
-      }
-
-    </script>
+    <script src="animation_top.js"></script>
   
 </body>
 </html>

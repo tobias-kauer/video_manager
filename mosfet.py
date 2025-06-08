@@ -34,12 +34,12 @@ class Mosfet:
             duration (int): Total duration of the pulse in seconds.
             steps (int): Number of steps for the pulse.
         """
-        print(f"Starting smooth pulse for {duration} seconds with {steps} steps.")
+        #print(f"Starting smooth pulse for {duration} seconds with {steps} steps.")
         for i in range(steps):
             brightness = (math.sin(i / steps * 2 * math.pi) + 1) / 2
             self.mosfet.value = brightness
             sleep(duration / steps)
-        print("Smooth pulse complete.")
+        #print("Smooth pulse complete.")
 
     def blink(self, on_time=2, off_time=2):
         """
@@ -105,6 +105,7 @@ class MockMosfet:
             steps (int): Number of steps for the pulse.
         """
         print(f"MockMosfet: Simulating smooth pulse for {duration} seconds with {steps} steps.")
+        sleep(duration)  # Simulate the duration of the pulse
 
     def blink(self, on_time=2, off_time=2):
         """

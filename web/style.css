@@ -17,8 +17,6 @@ body, html {
     animation: pulse 2s infinite;
   }
 
-
-
   #countdown-container {
     font-size: 18px;
     font-weight: bold;
@@ -30,6 +28,41 @@ body, html {
 
   #blinking-dot {
     animation: blink 1s infinite;
+  }
+
+  body {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2em;
+    margin: 0;
+    text-align: center;
+  }
+
+  h1, h2, h3, p {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  #scroll-container {
+    overflow: hidden; /* Hide overflowing content */
+    height: 50px; /* Set the height of the visible area */
+    position: relative;
+  }
+  
+  #scroll-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+  }
+  
+  #scroll-list li {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 16px;
+    padding: 5px 0;
   }
 
   @keyframes blink {

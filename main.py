@@ -7,6 +7,8 @@ from mosfet import *
 from platform_manager import is_raspberry_pi
 from segment_display import *
 
+debug_mode = True  # Set to True to enable debug mode
+
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
 VIDEO_LOCATION = "videos/"  # Directory to save videos
@@ -15,19 +17,19 @@ VIDEO_LOCATION = "videos/"  # Directory to save videos
 SENSOR_CAMERA_THRESHOLD = 20  # cm
 SENSOR_ROOM_THRESHOLD = 90  # cm
 
-
 # GPIO pin configuration for the sensors and MOSFET
 CAMERA_SENSOR_TRIGGER_PIN = 23
 CAMERA_SENSOR_ECHO_PIN = 24
 ROOM_SENSOR_TRIGGER_PIN = 25
 ROOM_SENSOR_ECHO_PIN = 27
 
-
 MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
 
 # Flags for manual sensor triggering
 sensor_camera_manual_trigger = False
 sensor_room_manual_trigger = False
+
+mosfet_pulsating = True  # Flag to control the pulsating behavior
 
 
 # Check if running on a Raspberry Pi
@@ -76,15 +78,24 @@ def monitor_sensors():
             trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
             sensor_camera_manual_trigger = False  # Reset manual trigger flag
 
+            eel.startRecordingEvent()  # Trigger the recording event in the frontend
+
         # Check if Sensor Room is within range or manually triggered
         if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) or sensor_room_manual_trigger:
             print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
             trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
             sensor_room_manual_trigger = False  # Reset manual trigger flag
 
-        
-
         time.sleep(0.1)  # Adjust the polling interval as needed
+def mosfet_pulse_background():
+    """
+    Continuously pulse the MOSFET in the background.
+    """
+    while True:
+        if mosfet_pulsating:
+            mosfet.pulse_smooth(duration=2, steps=50)  # Smooth pulse
+        else:
+            time.sleep(0.1)  # Pause briefly when pulsating is disabled
 
 @eel.expose
 def get_debug_data():
@@ -117,6 +128,7 @@ def set_lamp_brightness(percentage):
     lamp_brightness = percentage
     mosfet.set_pwm(percentage)
     print(f"Lamp brightness set to: {percentage}%")
+    mosfet_pulsating = False
 
 @eel.expose
 def trigger_sensor(sensor_name):
@@ -175,19 +187,26 @@ def process_frames(uuid):
     return f"Data processed for UUID: {uuid}"
 
 @eel.expose
-def trigger_animation():
-    print("Animation triggered from Python!")
+def trigger_animations():
+    print("All Animations triggered from Python!")
     eel.startAnimation()  # Calls the JS function
+    eel.startAnimationTopIdle()
 
 
 # Start the sensor monitoring thread
 sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
+# Start the MOSFET pulsating thread
+mosfet_thread = threading.Thread(target=mosfet_pulse_background, daemon=True)
+mosfet_thread.start()
+
 eel.start('index.html', size=(800 , 600), block=False)
 #eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
-#eel.start('debug.html', size=(800, 600), block=False)
+
+if debug_mode:
+    eel.start('debug.html', size=(800, 600), block=False)
 
 # Keep the app running
 while True:
