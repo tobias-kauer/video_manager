@@ -14,7 +14,8 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 const scale = 0.4;
 const speed = 0.002;
 const maxPoints = 1000;
-const selectedFile = 'pca_output.json';
+const selectedFile = 'data/pca_output_vector.json';
+const enableSimilarityBackground = true; // Flag to enable/disable similarity-based backgrounds
 
 const group = new THREE.Group();
 scene.add(group);
@@ -28,10 +29,16 @@ function loadSprites(data) {
   const loader = new THREE.TextureLoader();
   const limitedSprites = data.slice(0, Math.min(maxPoints, data.length));
 
+  // Extract the base path from the selected file URL
+  const basePath = selectedFile.substring(0, selectedFile.lastIndexOf('/') + 1);
+
   limitedSprites.forEach((item) => {
-    loader.load(item.imageUrl, (texture) => {
+    const imageUrl = basePath + item.imageUrl;
+
+    loader.load(imageUrl, (texture) => {
       texture.flipY = true; // Ensure texture is not flipped
       texture.encoding = THREE.sRGBEncoding; // Use sRGB color space for proper rendering
+
 
       const material = new THREE.SpriteMaterial({
         map: texture,
@@ -42,6 +49,25 @@ function loadSprites(data) {
       const sprite = new THREE.Sprite(material);
       sprite.position.set(...item.position);
       sprite.scale.set(scale, scale, 1);
+
+      // Add similarity-based background if enabled
+      if (enableSimilarityBackground && item.similarity > 60) {
+        const similarity = item.similarity || 0; // Default to 0 if similarity is not defined
+        const redOpacity = similarity / 200; // Scale similarity to opacity (0 to 1)
+
+        // Create a frame sprite slightly larger than the image
+        const frameMaterial = new THREE.SpriteMaterial({
+          color: new THREE.Color(1, 0, 0), // Pure red color
+          transparent: true,
+          opacity: redOpacity, // Set opacity based on similarity
+        });
+
+        const frameSprite = new THREE.Sprite(frameMaterial);
+        frameSprite.position.copy(sprite.position); // Match position of the sprite
+        frameSprite.scale.set(scale * 1.2, scale * 1.2, 1); // Slightly larger than the sprite
+        group.add(frameSprite);
+      }
+
       group.add(sprite);
     });
   });
