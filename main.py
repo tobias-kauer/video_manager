@@ -201,7 +201,7 @@ sensor_thread.start()
 mosfet_thread = threading.Thread(target=mosfet_pulse_background, daemon=True)
 mosfet_thread.start()
 
-#eel.start('index.html', size=(800 , 600), block=False)
+eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
