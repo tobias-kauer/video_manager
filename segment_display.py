@@ -6,44 +6,48 @@ except ImportError:
 import time
 
 CHARACTER_MAP = {
-    '0': 0x3F,  # 0
-    '1': 0x06,  # 1
-    '2': 0x5B,  # 2
-    '3': 0x4F,  # 3
-    '4': 0x66,  # 4
-    '5': 0x6D,  # 5
-    '6': 0x7D,  # 6
-    '7': 0x07,  # 7
-    '8': 0x7F,  # 8
-    '9': 0x6F,  # 9
-    'A': 0x77,  # A
-    'B': 0x7C,  # B
-    'C': 0x39,  # C
-    'D': 0x5E,  # D
-    'E': 0x79,  # E
-    'F': 0x71,  # F
-    'G': 0x3D,  # G
-    'H': 0x76,  # H
-    'I': 0x06,  # I
-    'J': 0x1E,  # J
-    'K': 0x75,  # K (approximation)
-    'L': 0x38,  # L
-    'M': 0x37,  # M (approximation)
-    'N': 0x54,  # N
-    'O': 0x3F,  # O
-    'P': 0x73,  # P
-    'Q': 0x67,  # Q (approximation)
-    'R': 0x50,  # R (approximation)
-    'S': 0x6D,  # S
-    'T': 0x78,  # T
-    'U': 0x3E,  # U
-    'V': 0x3E,  # V (same as U)
-    'W': 0x2E,  # W (approximation)
-    'X': 0x76,  # X (same as H)
-    'Y': 0x6E,  # Y
-    'Z': 0x5B,  # Z
-    '-': 0x40,  # Dash
+    '0': 0x3F,  # ABCDEF
+    '1': 0x06,  # BC
+    '2': 0x5B,  # ABDEG
+    '3': 0x4F,  # ABCDG
+    '4': 0x66,  # BCFG
+    '5': 0x6D,  # ACDFG
+    '6': 0x7D,  # ACDEFG
+    '7': 0x07,  # ABC
+    '8': 0x7F,  # ABCDEFG
+    '9': 0x6F,  # ABCDFG
+
+    'A': 0x77,  # ABCEFG
+    'B': 0x7C,  # CDEFG (lowercase b)
+    'C': 0x39,  # ADEF
+    'D': 0x5E,  # BCDEG
+    'E': 0x79,  # ADEFG
+    'F': 0x71,  # AEFG
+    'G': 0x3D,  # ACDEFG (close approximation)
+    'H': 0x76,  # BCEFG
+    'I': 0x06,  # BC
+    'J': 0x1E,  # BCDE
+    'K': 0x75,  # AEFG (very approximate)
+    'L': 0x38,  # DEF
+    'M': 0x37,  # ABCEF (very approximate)
+    'N': 0x54,  # CEFG (approximate)
+    'O': 0x3F,  # ABCDEF
+    'P': 0x73,  # ABFG
+    'Q': 0x67,  # ABCFG (approximate)
+    'R': 0x50,  # EFG (approximate)
+    'S': 0x6D,  # ACDFG
+    'T': 0x78,  # DEFG
+    'U': 0x3E,  # BCDEF
+    'V': 0x3E,  # BCDEF (same as U)
+    'W': 0x2A,  # BCEF (approximation)
+    'X': 0x76,  # BCEFG (same as H)
+    'Y': 0x6E,  # BCDFG
+    'Z': 0x5B,  # ABDEG (same as 2)
+
+    '-': 0x40,  # G
     ' ': 0x00,  # Blank
+    '_': 0x08,  # D
+    '=': 0x48,  # DG
 }
 
 class SegmentDisplay:
@@ -102,6 +106,21 @@ class SegmentDisplay:
                 self.write_cmd(i, int(number_str[i - 1]))
             else:
                 self.write_cmd(i, 0x0F)  # Blank
+
+    def test_character(display, character):
+        """
+        Test displaying a single character on the segment display.
+
+        Args:
+            display (SegmentDisplay or MockSegmentDisplay): The display object.
+            character (str): The character to display.
+        """
+        character = character.upper()  # Ensure the character is uppercase
+        if character in CHARACTER_MAP:
+            display.write_cmd(1, CHARACTER_MAP[character])  # Write the character to the first register
+            print(f"Displayed character '{character}'")
+        else:
+            print(f"Character '{character}' is not supported in CHARACTER_MAP")
 
 
     def display_text(self, text):

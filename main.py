@@ -123,10 +123,14 @@ def display_controller():
     segmentDisplay.clear_display()  # Clear the display
 
     while True:
-        segmentDisplay.scroll_text("TOTAL SUBMISSIONS", delay=0.1)  # Scroll a welcome message
-        time.sleep(0.1)
+        segmentDisplay.test_character("E")  # Display "IDLE" text
+         # Clear the display
+        #segmentDisplay.scroll_text("TOTAL SUBMISSIONS", delay=0.1)  # Scroll a welcome message
+        time.sleep(1)
+        segmentDisplay.clear_display() 
         segmentDisplay.display_number(total_submissions)  # Display the total submissions
         time.sleep(2)
+        segmentDisplay.clear_display() 
 
 @eel.expose
 def set_state(new_state):

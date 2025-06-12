@@ -25,7 +25,8 @@ EPOCHS = 100
 IMAGE_SIZE = 64
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
 MODEL_PATH = "model/dcgan_noBG_generator_030.pth"
-OUTPUT_FOLDER = "pca_images"
+OUTPUT_FOLDER = "tsne_images"
+OUTPUT_FILE = "tsne_output.json"
 
 
 '''DATA_DIR = "hands_64_noBG"
@@ -77,7 +78,15 @@ class DCGANGenerator(nn.Module):
 
 # --- Load the Trained Generator ---
 dcgan_generator = DCGANGenerator(latent_dim=LATENT_DIM).to(DEVICE)
-dcgan_generator.load_state_dict(torch.load(MODEL_PATH))
+
+try:
+    dcgan_generator.load_state_dict(torch.load(MODEL_PATH, map_location=DEVICE))
+except RuntimeError as e:
+    print(f"Error loading model: {e}")
+    print("Attempting to load on CPU...")
+    dcgan_generator.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+    dcgan_generator = dcgan_generator.to(DEVICE)
+
 dcgan_generator.eval()  # Set to evaluation mode
 
 def generate_dimensionality_reduction_visualization(
@@ -119,7 +128,44 @@ def generate_dimensionality_reduction_visualization(
         raise ValueError("Invalid reduction method. Choose 'tsne' or 'pca'.")
 
     # Step 3: Generate images and prepare output
+
+    # Step 3: Generate images and prepare output
     output = []
+    batch_size = 64  # Define a batch size for processing
+    num_batches = (num_samples + batch_size - 1) // batch_size  # Calculate the number of batches
+
+    for batch_idx in range(num_batches):
+        start_idx = batch_idx * batch_size
+        end_idx = min(start_idx + batch_size, num_samples)
+        latent_vectors = z[start_idx:end_idx]
+
+        with torch.no_grad():
+            generated_images = generator(latent_vectors).cpu()  # Shape: [batch_size, C, H, W]
+            generated_images = (generated_images + 1) / 2  # Normalize to [0, 1]
+
+            for i, generated_image in enumerate(generated_images):
+                if use_base64:
+                    # Convert image to base64
+                    import io
+                    import base64
+                    buffer = io.BytesIO()
+                    save_image(generated_image, buffer, format="PNG", normalize=True)
+                    buffer.seek(0)
+                    base64_image = f"data:image/png;base64,{base64.b64encode(buffer.read()).decode('utf-8')}"
+                    output.append({
+                        "position": z_reduced[start_idx + i].tolist(),
+                        "imageUrl": base64_image
+                    })
+                else:
+                    # Save image to file
+                    image_path = os.path.join(output_folder, f"image_{start_idx + i:03d}.png")
+                    save_image(generated_image, image_path, normalize=True)
+                    output.append({
+                        "position": z_reduced[start_idx + i].tolist(),
+                        "imageUrl": image_path
+                    })
+
+    '''output = []
     for i, latent_vector in enumerate(z):
         with torch.no_grad():
             generated_image = generator(latent_vector.unsqueeze(0)).cpu()  # Shape: [1, C, H, W]
@@ -145,7 +191,7 @@ def generate_dimensionality_reduction_visualization(
                     "position": z_reduced[i].tolist(),
                     "imageUrl": image_path
                 })
-
+'''
     # Save the output as a JSON file
     with open(output_json, "w") as json_file:
         json.dump(output, json_file, indent=4)
@@ -159,8 +205,8 @@ output = generate_dimensionality_reduction_visualization(
     dcgan_generator, 
     latent_dim=LATENT_DIM, 
     num_samples=1000, 
-    reduction_method="pca", 
+    reduction_method="tsne", 
     output_folder=OUTPUT_FOLDER, 
     use_base64=False, 
-    output_json="pca_output.json"
+    output_json=OUTPUT_FILE
 )
