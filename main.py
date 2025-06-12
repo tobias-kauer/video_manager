@@ -9,6 +9,7 @@ from segment_display import *
 from model_visualizer import *
 
 debug_mode = True  # Set to True to enable debug mode
+disable_sensors = True  # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -75,13 +76,10 @@ def monitor_sensors():
     Continuously monitor both sensors and trigger a function if a threshold is crossed.
     """
 
-    global sensor_camera_manual_trigger, sensor_room_manual_trigger
-
     while True:
 
-        if get_state() == IDLE_STATE:
+        if get_state() == IDLE_STATE and not disable_sensors:
 
-            # Check if Sensor Camera is within range or manually triggered
             if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
@@ -90,14 +88,13 @@ def monitor_sensors():
  
                 #eel.startRecordingEvent()  # Trigger the recording event in the frontend
 
-            # Check if Sensor Room is within range or manually triggered
-            if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) :
+            if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD):
                 print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
                 set_state(ROOM_STATE)
 
                 #trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
 
-        if get_state() == ROOM_STATE:
+        if get_state() == ROOM_STATE and not disable_sensors:
 
             # Check if Sensor Camera is within range or manually triggered
             if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
@@ -108,8 +105,7 @@ def monitor_sensors():
                 #trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
                 sensor_camera_manual_trigger = False  # Reset manual trigger flag
 
-                eel.startRecordingEvent()  # Trigger the recording event in the frontend
-
+                #eel.startRecordingEvent()  # Trigger the recording event in the frontend
 
         time.sleep(0.1)  # Adjust the polling interval as needed
 def mosfet_controller():
@@ -125,6 +121,7 @@ def mosfet_controller():
             mosfet.blink(on_time=2, off_time=2)
             mosfet.set_pwm(100)  # Set MOSFET to 100% brightness
 def display_controller():
+
     """
     Continuously update the segment display in the background.
     """
@@ -141,6 +138,31 @@ def display_controller():
         segmentDisplay.display_number(total_submissions)  # Display the total submissions
         time.sleep(2)
         segmentDisplay.clear_display() 
+
+def model_trainer():
+    """
+    Reload the model in a separate thread to avoid blocking the main application.
+    """
+    while True:
+            # Check if the current state is TRAINING_STATE
+            if get_state() == TRAINING_STATE:
+                print("Training started...")
+                modelviz_train("0000000")  # Execute the model training logic
+                print("Training completed. Switching to VISUALIZING_STATE.")
+                set_state(VISUALIZING_STATE)  # Set the state to VISUALIZING_STATE
+            time.sleep(1)  # Wait for 1 second before checking the state again
+def data_recorder():
+    """
+    Record video data in a separate thread to avoid blocking the main application.
+    """
+    while True:
+        if get_state() == RECORDING_STATE:
+            print("Recording started...")
+            eel.startRecordingEvent()
+            print("Recording completed. Switching to IDLE_STATE.")
+            set_state(IDLE_STATE)  # Set the state to IDLE_STATEr
+        time.sleep(1)  # Wait for 1 second before checking the state again
+
 
 @eel.expose
 def set_state(new_state):
@@ -190,19 +212,7 @@ def get_total_submissions():
     print(f"Total submissions: {total_submissions}")
     return total_submissions
 
-@eel.expose
-def model_trainer():
-    """
-    Reload the model in a separate thread to avoid blocking the main application.
-    """
-    while True:
-            # Check if the current state is TRAINING_STATE
-            if get_state() == TRAINING_STATE:
-                print("Training started...")
-                modelviz_train("0000000")  # Execute the model training logic
-                print("Training completed. Switching to VISUALIZING_STATE.")
-                set_state(VISUALIZING_STATE)  # Set the state to VISUALIZING_STATE
-            time.sleep(1)  # Wait for 1 second before checking the state again
+
 
 
 @eel.expose
@@ -255,9 +265,13 @@ display_thread.start()
 training_thread = threading.Thread(target=model_trainer, daemon=True)
 training_thread.start()
 
+# Start the data recorder thread
+data_recorder_thread = threading.Thread(target=data_recorder, daemon=True)
+data_recorder_thread.start()
 
-#eel.start('index.html', size=(800 , 600), block=False)
-eel.start('three.html', size=(720, 1000), block=False)
+
+eel.start('index.html', size=(800 , 600), block=False)
+#eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
 #reload_model()  # Load the model visualizer with the initial UUID

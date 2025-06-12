@@ -3,7 +3,7 @@ body, html {
     padding: 0;
     background-color: black;
     color: white;
-    font-family: sans-serif;
+    font-family: 'IBM Plex Mono', monospace;
     height: 100%;
     overflow: hidden;
   }
@@ -30,25 +30,87 @@ body, html {
     animation: blink 1s infinite;
   }
 
-  body {
-    font-family: 'IBM Plex Mono', monospace;
-  }
-
   h1 {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 2em;
     margin: 0;
-    text-align: center;
   }
 
   h1, h2, h3, p {
     font-family: 'IBM Plex Mono', monospace;
   }
 
+  .animation-container {
+    width: 100%; 
+    height: 100%; 
+    position: relative; 
+    overflow: hidden;
+  }
+
+  .text-container {
+    width: 100%;
+    max-width: 1520px; 
+    height: 100%;
+    max-height: 1080px;
+    margin-left: 200px; 
+    margin-right: 200px; 
+    left: 0px; 
+    top: 0px; 
+    position: absolute;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: flex-start; 
+    gap: 30px; 
+    display: inline-flex"
+  }
+
+  .main-text {
+    width: 100%;
+    align-self: stretch; 
+    text-align: start; 
+    justify-content: center; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 0px;
+    margin: 0px;
+
+    color: white; 
+    font-size: 70px; 
+    font-family: IBM Plex Mono; 
+    font-weight: 500; 
+    line-height: 85.80px;
+    letter-spacing: -4px;
+    word-wrap: break-word
+  }
+
+  .small-text {
+    width: 100%;
+    align-self: stretch; 
+    text-align: start; 
+    justify-content: center; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 0px;
+    margin: 0px;
+
+    color: white; 
+    font-size: 24px; 
+    font-family: IBM Plex Mono; 
+    font-weight: 500; 
+    line-height: 26.40px; 
+    word-wrap: break-word
+  }
+
   #scroll-container {
     overflow: hidden; /* Hide overflowing content */
-    height: 50px; /* Set the height of the visible area */
+    height: 200px; /* Set the height of the visible area */
+    width: 100%; /* Full width */
     position: relative;
+
+    display: flex; /* Arrange lists horizontally */
+    justify-content: space-between; /* Add space between lists */
+    align-items: flex-start; /* Align lists at the top */
+    gap: 20px; /* Add spacing between lists */
   }
   
   #scroll-list {
@@ -57,12 +119,18 @@ body, html {
     padding: 0;
     position: absolute;
     top: 0;
+
+    width: 150px; /* Set a fixed width for each list */
+    overflow: hidden; /* Hide overflowing content */
   }
   
   #scroll-list li {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 16px;
-    padding: 5px 0;
+    color: white; 
+    font-size: 24px; 
+    font-family: IBM Plex Mono; 
+    font-weight: 500; 
+    line-height: 26.40px; 
+    word-wrap: break-word
   }
 
   @keyframes blink {
@@ -71,8 +139,3 @@ body, html {
     100% { opacity: 1; }
   }
   
-  @keyframes pulse {
-    0%   { opacity: 0.3; }
-    50%  { opacity: 1; }
-    100% { opacity: 0.3; }
-  }

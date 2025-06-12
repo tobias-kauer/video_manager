@@ -80,8 +80,11 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
                 print("Failed to grab frame")
                 break
 
+            # Flip the frame horizontally
+            flipped_frame = cv2.flip(frame, 1)  # Use 0 for vertical flip, 1 for horizontal flip, -1 for both
+
             # Convert the frame to a square 480x480 image
-            square_frame = convert_to_square(frame, size=480)
+            square_frame = convert_to_square(flipped_frame, size=480)
 
             # Write the frame to the video file
             out.write(square_frame)
