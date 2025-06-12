@@ -118,7 +118,7 @@ class SegmentDisplay:
         character = character.upper()  # Ensure the character is uppercase
         if character in CHARACTER_MAP:
             display.write_cmd(1, CHARACTER_MAP[character])  # Write the character to the first register
-            print(f"Displayed character '{character}'")
+            #print(f"Displayed character '{character}'")
         else:
             print(f"Character '{character}' is not supported in CHARACTER_MAP")
 

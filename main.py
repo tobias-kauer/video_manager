@@ -82,7 +82,7 @@ def monitor_sensors():
         if get_state() == IDLE_STATE:
 
             # Check if Sensor Camera is within range or manually triggered
-            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
+            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
 
@@ -91,7 +91,7 @@ def monitor_sensors():
                 #eel.startRecordingEvent()  # Trigger the recording event in the frontend
 
             # Check if Sensor Room is within range or manually triggered
-            if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) or sensor_room_manual_trigger:
+            if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) :
                 print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
                 set_state(ROOM_STATE)
 
@@ -100,7 +100,7 @@ def monitor_sensors():
         if get_state() == ROOM_STATE:
 
             # Check if Sensor Camera is within range or manually triggered
-            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
+            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
 
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
