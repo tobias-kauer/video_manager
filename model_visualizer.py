@@ -24,6 +24,8 @@ BATCH_SIZE = 64
 EPOCHS = 100
 IMAGE_SIZE = 64
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
+MODEL_PATH = "model/dcgan_noBG_generator_030.pth"
+OUTPUT_FOLDER = "pca_images"
 
 
 '''DATA_DIR = "hands_64_noBG"
@@ -75,7 +77,7 @@ class DCGANGenerator(nn.Module):
 
 # --- Load the Trained Generator ---
 dcgan_generator = DCGANGenerator(latent_dim=LATENT_DIM).to(DEVICE)
-dcgan_generator.load_state_dict(torch.load("model/dcgan_noBG_generator_030.pth"))
+dcgan_generator.load_state_dict(torch.load(MODEL_PATH))
 dcgan_generator.eval()  # Set to evaluation mode
 
 def generate_dimensionality_reduction_visualization(
@@ -158,7 +160,7 @@ output = generate_dimensionality_reduction_visualization(
     latent_dim=LATENT_DIM, 
     num_samples=1000, 
     reduction_method="pca", 
-    output_folder="pca_images", 
+    output_folder=OUTPUT_FOLDER, 
     use_base64=False, 
     output_json="pca_output.json"
 )

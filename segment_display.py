@@ -3,6 +3,49 @@ try:
 except ImportError:
     spidev = None  # Handle the case where spidev is not available
 
+import time
+
+CHARACTER_MAP = {
+    '0': 0x3F,  # 0
+    '1': 0x06,  # 1
+    '2': 0x5B,  # 2
+    '3': 0x4F,  # 3
+    '4': 0x66,  # 4
+    '5': 0x6D,  # 5
+    '6': 0x7D,  # 6
+    '7': 0x07,  # 7
+    '8': 0x7F,  # 8
+    '9': 0x6F,  # 9
+    'A': 0x77,  # A
+    'B': 0x7C,  # B
+    'C': 0x39,  # C
+    'D': 0x5E,  # D
+    'E': 0x79,  # E
+    'F': 0x71,  # F
+    'G': 0x3D,  # G
+    'H': 0x76,  # H
+    'I': 0x06,  # I
+    'J': 0x1E,  # J
+    'K': 0x75,  # K (approximation)
+    'L': 0x38,  # L
+    'M': 0x37,  # M (approximation)
+    'N': 0x54,  # N
+    'O': 0x3F,  # O
+    'P': 0x73,  # P
+    'Q': 0x67,  # Q (approximation)
+    'R': 0x50,  # R (approximation)
+    'S': 0x6D,  # S
+    'T': 0x78,  # T
+    'U': 0x3E,  # U
+    'V': 0x3E,  # V (same as U)
+    'W': 0x2E,  # W (approximation)
+    'X': 0x76,  # X (same as H)
+    'Y': 0x6E,  # Y
+    'Z': 0x5B,  # Z
+    '-': 0x40,  # Dash
+    ' ': 0x00,  # Blank
+}
+
 class SegmentDisplay:
     def __init__(self):
         """
@@ -46,7 +89,7 @@ class SegmentDisplay:
         for i in range(1, 9):
             self.write_cmd(i, 0x0F)  # Blank
 
-    def display_number_old(self, number):
+    def display_number(self, number):
         """
         Display a number on the segment display.
 
@@ -61,7 +104,36 @@ class SegmentDisplay:
                 self.write_cmd(i, 0x0F)  # Blank
 
 
-    def display_number(self, number):
+    def display_text(self, text):
+        """
+        Display text on the segment display.
+
+        Args:
+            text (str): The text to display (max 8 characters).
+        """
+        text = text.upper().ljust(8)[:8]  # Convert to uppercase, pad, and truncate to 8 characters
+        for i in range(1, 9):
+            char = text[i - 1]
+            if char in CHARACTER_MAP:
+                self.write_cmd(i, CHARACTER_MAP[char])  # Write the mapped character
+            else:
+                self.write_cmd(i, 0x00)  # Blank for unsupported characters
+
+    def scroll_text(self, text, delay=0.5):
+        """
+        Scroll text across the segment display.
+
+        Args:
+            text (str): The text to scroll.
+            delay (float): Delay between each scroll step (in seconds).
+        """
+        text = text.upper() + " " * 8  # Add spaces for scrolling
+        for i in range(len(text) - 7):  # Scroll step by step
+            self.display_text(text[i:i + 8])
+            time.sleep(delay)
+
+
+    def display_number_broken(self, number):
         """
         Display a number on the segment display.
 
@@ -127,6 +199,12 @@ class MockSegmentDisplay:
             else:
                 self.write_cmd(i, 0x0F)  # Blank
         print(f"MockSegmentDisplay: Displaying number {number}")
+
+    def display_text(self, text):
+        print(f"MockSegmentDisplay: Displaying text '{text}'")
+
+    def scroll_text(self, text, delay=0.5):
+        print(f"MockSegmentDisplay: Scrolling text '{text}' with delay {delay}")    
 
 '''# -------------------------------
 # DISPLAY SETUP

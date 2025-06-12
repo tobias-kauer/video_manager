@@ -29,7 +29,16 @@ MOSFET_GPIO_PIN = 17  # GPIO pin for the MOSFET
 sensor_camera_manual_trigger = False
 sensor_room_manual_trigger = False
 
-mosfet_pulsating = True  # Flag to control the pulsating behavior
+# Define global states
+IDLE_STATE = "idle"
+ROOM_STATE = "room"
+CAMERA_STATE = "camera"
+DEBUG_STATE = "debug"
+
+# Initialize the current state
+current_state = IDLE_STATE
+
+total_submissions = 124
 
 
 # Check if running on a Raspberry Pi
@@ -58,9 +67,6 @@ last_display_value = 0
 lamp_brightness = 0
 
 print("Initializing Eel...")  # Starting EEl for the web interface
-
-mosfet.set_pwm(80)  # Initialize MOSFET to 0% brightnes
-
 eel.init('web')
  
 def monitor_sensors():
@@ -72,30 +78,78 @@ def monitor_sensors():
 
     while True:
 
-        # Check if Sensor Camera is within range or manually triggered
-        if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
-            print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
-            trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
-            sensor_camera_manual_trigger = False  # Reset manual trigger flag
+        if get_state() == IDLE_STATE:
 
-            eel.startRecordingEvent()  # Trigger the recording event in the frontend
+            # Check if Sensor Camera is within range or manually triggered
+            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
+                print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
+                trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
+                sensor_camera_manual_trigger = False  # Reset manual trigger flag
 
-        # Check if Sensor Room is within range or manually triggered
-        if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) or sensor_room_manual_trigger:
-            print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
-            trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
-            sensor_room_manual_trigger = False  # Reset manual trigger flag
+                eel.startRecordingEvent()  # Trigger the recording event in the frontend
+
+            # Check if Sensor Room is within range or manually triggered
+            if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD) or sensor_room_manual_trigger:
+                print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
+                trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
+                sensor_room_manual_trigger = False  # Reset manual trigger flag
+
+        if get_state() == ROOM_STATE:
+
+            # Check if Sensor Camera is within range or manually triggered
+            if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD) or sensor_camera_manual_trigger:
+                print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
+                trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
+                sensor_camera_manual_trigger = False  # Reset manual trigger flag
+
+                eel.startRecordingEvent()  # Trigger the recording event in the frontend
+
 
         time.sleep(0.1)  # Adjust the polling interval as needed
-def mosfet_pulse_background():
+def mosfet_controller():
     """
     Continuously pulse the MOSFET in the background.
     """
     while True:
-        if mosfet_pulsating:
-            mosfet.pulse_smooth(duration=2, steps=50)  # Smooth pulse
+        if get_state() == IDLE_STATE:
+            mosfet.pulse_smooth(duration=10, steps=1000)  # Smooth pulse
         else:
             time.sleep(0.1)  # Pause briefly when pulsating is disabled
+def display_controller():
+    """
+    Continuously update the segment display in the background.
+    """
+    segmentDisplay.init_display()  # Initialize the display
+    segmentDisplay.clear_display()  # Clear the display
+
+    while True:
+        segmentDisplay.scroll_text("TOTAL SUBMISSIONS", delay=0.1)  # Scroll a welcome message
+        time.sleep(0.1)
+        segmentDisplay.display_number(total_submissions)  # Display the total submissions
+        time.sleep(2)
+
+@eel.expose
+def set_state(new_state):
+    """
+    Set the global state to the specified state.
+
+    Args:
+        new_state (str): The new state to set (IDLE_STATE, ROOM_STATE, CAMERA_STATE).
+    """
+    global current_state
+    current_state = new_state
+    print(f"State changed to: {current_state}")
+
+@eel.expose
+def get_state():
+    """
+    Get the current global state.
+
+    Returns:
+        str: The current state.
+    """
+    global current_state
+    return current_state
 
 @eel.expose
 def get_debug_data():
@@ -128,7 +182,6 @@ def set_lamp_brightness(percentage):
     lamp_brightness = percentage
     mosfet.set_pwm(percentage)
     print(f"Lamp brightness set to: {percentage}%")
-    mosfet_pulsating = False
 
 @eel.expose
 def trigger_sensor(sensor_name):
@@ -184,6 +237,8 @@ def process_frames(uuid):
 
     process_images_in_folder(input_dir, output_dir, suffix="_processed", replace_transparent=False)
 
+    set_state(IDLE_STATE)  # Reset state to IDLE after processing
+
     return f"Data processed for UUID: {uuid}"
 
 @eel.expose
@@ -198,8 +253,12 @@ sensor_thread = threading.Thread(target=monitor_sensors, daemon=True)
 sensor_thread.start()
 
 # Start the MOSFET pulsating thread
-mosfet_thread = threading.Thread(target=mosfet_pulse_background, daemon=True)
+mosfet_thread = threading.Thread(target=mosfet_controller, daemon=True)
 mosfet_thread.start()
+
+# Start the display controller thread
+display_thread = threading.Thread(target=display_controller, daemon=True)
+display_thread.start()
 
 eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
