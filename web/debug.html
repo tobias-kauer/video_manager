@@ -28,58 +28,34 @@
 <body>
   <h1>Debug Window</h1>
   <div class="container">
-    <h2>Sensor Values</h2>
-    <p>Sensor Camera: <span id="sensor-camera-value">0</span> cm</p>
-    <p>Sensor Room: <span id="sensor-room-value">0</span> cm</p>
-  </div>
-  <div class="container">
-    <h2>Display</h2>
-    <p>Last Display Value: <span id="last-display-value">0</span></p>
-    <input type="number" id="display-input" placeholder="Enter value (0-99999999)">
-    <button class="button" onclick="updateDisplay()">Set Display Value</button>
-  </div>
-  <div class="container">
-    <h2>Lamp</h2>
-    <p>Current Brightness: <span id="lamp-brightness">0</span>%</p>
-    <input type="number" id="lamp-input" placeholder="Enter brightness (0-100)">
-    <button class="button" onclick="updateLampBrightness()">Set Lamp Brightness</button>
-  </div>
-  <div class="container">
-    <h2>Trigger Sensors</h2>
-    <button class="button" onclick="triggerSensor('Sensor Camera')">Trigger Sensor Camera</button>
-    <button class="button" onclick="triggerSensor('Sensor Room')">Trigger Sensor Room</button>
+    <h2>Current State</h2>
+    <p>Current State: <span id="current-state">idle</span></p>
+    <h3>Change State</h3>
+    <button class="button" onclick="changeState('idle')">Idle</button>
+    <button class="button" onclick="changeState('room')">Room</button>
+    <button class="button" onclick="changeState('camera')">Camera</button>
+    <button class="button" onclick="changeState('recording')">Recording</button>
+    <button class="button" onclick="changeState('training')">Training</button>
+    <button class="button" onclick="changeState('visualizing')">Visualizing</button>
+    <button class="button" onclick="changeState('debug')">Debug</button>
   </div>
 
   <script type="text/javascript" src="eel.js"></script>
   <script>
-    function updateDebugData() {
-      eel.get_debug_data()().then(data => {
-        document.getElementById('sensor-camera-value').textContent = data.sensor_camera_value.toFixed(2);
-        document.getElementById('sensor-room-value').textContent = data.sensor_room_value.toFixed(2);
-        document.getElementById('last-display-value').textContent = data.last_display_value;
-        document.getElementById('lamp-brightness').textContent = data.lamp_brightness;
+    function updateCurrentState() {
+      eel.get_state()().then(state => {
+        document.getElementById('current-state').textContent = state;
       });
     }
 
-    function updateDisplay() {
-      const value = parseInt(document.getElementById('display-input').value);
-      if (!isNaN(value)) {
-        eel.set_display_value(value);
-      }
+    function changeState(newState) {
+      eel.set_state(newState)().then(() => {
+        updateCurrentState(); // Refresh the current state display
+      });
     }
 
-    function updateLampBrightness() {
-      const percentage = parseInt(document.getElementById('lamp-input').value);
-      if (!isNaN(percentage) && percentage >= 0 && percentage <= 100) {
-        eel.set_lamp_brightness(percentage);
-      }
-    }
-
-    function triggerSensor(sensorName) {
-      eel.trigger_sensor(sensorName);
-    }
-
-    setInterval(updateDebugData, 500); // Update debug data every 500ms
+    // Update the current state every second
+    setInterval(updateCurrentState, 1000);
   </script>
 </body>
 </html>

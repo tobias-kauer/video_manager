@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 
 
+
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -11,16 +12,16 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 
 // Set up basic scene properties
 
-const scale = 0.4;
+const scale = 4;
 const speed = 0.002;
 const maxPoints = 1000;
-const selectedFile = 'data/pca_output_vector.json';
+const selectedFile = 'data/tsne_images/tsne_output.json';
 const enableSimilarityBackground = true; // Flag to enable/disable similarity-based backgrounds
 
 const group = new THREE.Group();
 scene.add(group);
 
-camera.position.z = 10;
+camera.position.z = 100;
 
 // Center the sprite group in the scene
 group.position.set(0, 0, 0);
@@ -104,7 +105,7 @@ window.addEventListener('resize', onWindowResize, false);
 let movingForward = false;
 let movingBackward = false;
 let moveTarget = 2; // Target position when moving forward
-let moveSpeed = 0.01; // Speed of movement
+let moveSpeed = 0.05; // Speed of movement
 
 // Animation loop
 function animate() {

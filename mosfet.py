@@ -41,6 +41,30 @@ class Mosfet:
             sleep(duration / steps)
         #print("Smooth pulse complete.")
 
+    def pulse_smooth_with_range(self, duration=10, steps=100, min_brightness=0.2, max_brightness=0.8):
+        """
+        Smoothly pulse the MOSFET brightness between a specified range using a sine wave.
+
+        Args:
+            duration (int): Total duration of the pulse in seconds.
+            steps (int): Number of steps for the pulse.
+            min_brightness (float): Minimum brightness value (0 to 1).
+            max_brightness (float): Maximum brightness value (0 to 1).
+        """
+        if not (0 <= min_brightness <= 1 and 0 <= max_brightness <= 1):
+            raise ValueError("Brightness values must be between 0 and 1.")
+        if min_brightness >= max_brightness:
+            raise ValueError("min_brightness must be less than max_brightness.")
+
+        print(f"Starting smooth pulse with range ({min_brightness}, {max_brightness}) for {duration} seconds with {steps} steps.")
+        for i in range(steps):
+            # Calculate brightness using sine wave and scale it to the specified range
+            sine_value = (math.sin(i / steps * 2 * math.pi) + 1) / 2  # Sine wave value between 0 and 1
+            brightness = min_brightness + (max_brightness - min_brightness) * sine_value
+            self.mosfet.value = brightness
+            sleep(duration / steps)
+        print("Smooth pulse with range complete.")
+
     def blink(self, on_time=2, off_time=2):
         """
         Blink the MOSFET on and off in a loop.
