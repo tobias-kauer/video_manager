@@ -114,7 +114,7 @@ def calculate_similarity(original_vector, latent_vector, method="cosine"):
     else:
         raise ValueError("Invalid method. Use 'cosine' or 'euclidean'.")
 
-def invert_image_to_latent(image_path, generator, latent_dim, device, num_steps=100, learning_rate=0.01):
+def invert_image_to_latent(image_path, generator, latent_dim, device, num_steps=50, learning_rate=0.01):
     """
     Perform GAN inversion to find the latent vector corresponding to an input RGBA image.
 
@@ -368,11 +368,11 @@ def modelviz_train(uuid="000000"):
     output = generate_dimensionality_reduction_visualization_with_similarity_analysis(
         dcgan_generator, 
         latent_dim=LATENT_DIM, 
-        num_samples=1000, 
+        num_samples=256*4, 
         reduction_method="tsne", 
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,
         similarity_vector=invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE),
-        batch_size=100
+        batch_size=256
     )

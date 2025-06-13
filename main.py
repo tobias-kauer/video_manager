@@ -10,7 +10,7 @@ from model_visualizer import *
 import time
 
 debug_mode = True  # Set to True to enable debug mode
-disable_sensors = False  # Set to True to disable sensors
+disable_sensors = False # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -91,8 +91,6 @@ def monitor_sensors():
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
 
-                #eel.startRecordingEvent()  # Trigger the recording event in the frontend
-
             if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD):
                 print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
                 set_state(ROOM_STATE)
@@ -151,7 +149,7 @@ def mosfet_controller():
             # Reset the interrupt flag for the next operation
             mosfet.interrupt = False
 
-            mosfet.set_pwm(60)
+            mosfet.set_pwm(100)
 
 
     '''while True:
@@ -235,8 +233,7 @@ def set_state(new_state):
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
-        print("Recording completed. Switching to IDLE_STATE.")
-        set_state(IDLE_STATE)
+        #set_state(IDLE_STATE)
     elif current_state == TRAINING_STATE:
         start_training_thread()
         print("Training state detected. Starting training...")
@@ -301,7 +298,7 @@ def process_frames(uuid):
     input_dir = f"{VIDEO_LOCATION}{uuid}/"
     output_dir = f"{VIDEO_LOCATION}{uuid}_noBG/"
 
-    # Process images in the input directory to remove background using skin mask
+    # Process images in the input directory to remove idlebackground using skin mask
     remove_background_skin_mask_directory(input_dir, output_dir, suffix="_noBG")
 
     input_dir = f"{VIDEO_LOCATION}{uuid}_noBG/"
@@ -337,7 +334,7 @@ display_thread.start()
 
 
 
-#eel.start('index.html', size=(800 , 600), block=False)
+eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
@@ -346,7 +343,6 @@ eel.start('three.html', size=(720, 1000), block=False)
 if debug_mode:
     eel.start('debug.html', size=(800, 600), block=False)
 
-# Keep the app running
+# Keep the app runningidle
 while True:
-
     eel.sleep(0.1)

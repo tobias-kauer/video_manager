@@ -1,6 +1,7 @@
 function startRecordingEvent() {
     console.log("Event started!");
     document.getElementById('idle-animation').style.display = 'none';
+    document.getElementById('room-animation').style.display = 'none';
     document.getElementById('camera-animation').style.display = 'block';
     eel.record_data(); // Trigger Python side
     startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
@@ -62,8 +63,6 @@ function on_record_done(uuid) {
   console.log("Recording finished: " + uuid);
   document.getElementById('camera-animation').style.display = 'none';
   document.getElementById('idle-animation').style.display = 'flex';
-
-  eel.trigger_animation();
-  eel.process_frames(uuid)
+  eel.set_state("idle"); // Set the state to idle after recording
   
 }

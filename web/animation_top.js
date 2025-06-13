@@ -16,12 +16,12 @@ let timeline;
     
     // Ensure the correct elements are visible and hidden before the animation starts
     document.getElementById("room-animation").style.display = "none"; // Hide room-animation
-    document.getElementById("room-animation").style.opacity = 0;
+    
     
     document.getElementById("idle-animation").style.display = "flex"; // Show idle-animation
-    document.getElementById("idle-animation").style.opacity = 1;
+    
     document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
-    document.getElementById("camera-animation").style.opacity = 0;
+    
     
     // Create a GSAP timeline
     timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
@@ -55,11 +55,11 @@ let timeline;
 
     // Ensure the correct elements are visible and hidden before the animation starts
     document.getElementById("idle-animation").style.display = "none"; // Show idle-animation
-    document.getElementById("idle-animation").style.opacity = 0;
+    
     document.getElementById("room-animation").style.display = "flex"; // Hide room-animation
-    document.getElementById("room-animation").style.opacity = 1;
+    
     document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
-    document.getElementById("camera-animation").style.opacity = 0;
+    
 
     // Create a GSAP timeline
     timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
