@@ -55,7 +55,7 @@ if is_raspberry_pi():
     print("Running on Raspberry Pi. Using real sensors and devices.")
     sensorCamera = UltrasonicSensor(trigger_pin=CAMERA_SENSOR_TRIGGER_PIN, echo_pin=CAMERA_SENSOR_ECHO_PIN, name="Sensor Camera")
     sensorRoom = UltrasonicSensor(trigger_pin=ROOM_SENSOR_TRIGGER_PIN, echo_pin=ROOM_SENSOR_ECHO_PIN, name="Sensor Room")
-    mosfet = Mosfet(gpio_pin=MOSFET_GPIO_PIN)
+    mosfet = Mosfet(gpio_pin=MOSFET_GPIO_PIN, frequency=3000)
     segmentDisplay = SegmentDisplay()
 
 else:
@@ -123,11 +123,11 @@ def mosfet_controller():
         if get_mosfet_state() == MOSEFET_BLINK:
             mosfet.blink(on_time=0.5, off_time=0.5)
         elif get_mosfet_state() == MOSFET_PULSE:
-            mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.9)
+            mosfet.pulse_smooth_with_range(duration=15, steps=1000, min_brightness=0.4, max_brightness=1)
         elif get_mosfet_state() == MOSFET_OFF:
             mosfet.set_pwm(0)
         elif get_mosfet_state() == MOSFET_ON:
-            mosfet.set_pwm(100)
+            mosfet.set_pwm(30)
 
     '''while True:
         if get_state() == IDLE_STATE:
@@ -146,12 +146,7 @@ def display_controller():
     segmentDisplay.clear_display()  # Clear the display
 
     while True:
-
-        segmentDisplay.test_character("E")  # Display "IDLE" text
-         # Clear the display
-        #segmentDisplay.scroll_text("TOTAL SUBMISSIONS", delay=0.1)  # Scroll a welcome message
-        time.sleep(1)
-        segmentDisplay.clear_display() 
+ 
         segmentDisplay.display_number(total_submissions)  # Display the total submissions
         time.sleep(2)
         segmentDisplay.clear_display() 
@@ -319,7 +314,7 @@ data_recorder_thread.start()
 
 
 eel.start('index.html', size=(800 , 600), block=False)
-#eel.start('three.html', size=(720, 1000), block=False)
+eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
 #reload_model()  # Load the model visualizer with the initial UUID

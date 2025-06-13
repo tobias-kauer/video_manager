@@ -2,15 +2,17 @@ from gpiozero import PWMLED
 from time import sleep
 import math
 
+
 class Mosfet:
-    def __init__(self, gpio_pin=17):
+    def __init__(self, gpio_pin=17, frequency=1500):
         """
         Initialize the Mosfet object with the specified GPIO pin.
 
         Args:
             gpio_pin (int): The GPIO pin connected to the MOSFET.
         """
-        self.mosfet = PWMLED(gpio_pin)
+        self.mosfet = PWMLED(gpio_pin, frequency=frequency)
+        
 
     def on(self):
         """
@@ -34,12 +36,20 @@ class Mosfet:
             duration (int): Total duration of the pulse in seconds.
             steps (int): Number of steps for the pulse.
         """
-        #print(f"Starting smooth pulse for {duration} seconds with {steps} steps.")
-        for i in range(steps):
-            brightness = (math.sin(i / steps * 2 * math.pi) + 1) / 2
+        # Precompute brightness values
+        brightness_values = [(math.sin(i / steps * 2 * math.pi) + 1) / 2 for i in range(steps)]
+        step_duration = duration / steps
+
+        print(f"Starting smooth pulse for {duration} seconds with {steps} steps.")
+        
+        # Gradually apply brightness values
+        for brightness in brightness_values:
             self.mosfet.value = brightness
-            sleep(duration / steps)
-        #print("Smooth pulse complete.")
+            sleep(step_duration)
+        
+        # Ensure the MOSFET returns to a stable state
+        self.mosfet.value = 0
+        print("Smooth pulse complete.")
 
     def pulse_smooth_with_range(self, duration=10, steps=100, min_brightness=0.2, max_brightness=0.8):
         """
@@ -73,15 +83,12 @@ class Mosfet:
             on_time (int): Duration in seconds for the MOSFET to stay on.
             off_time (int): Duration in seconds for the MOSFET to stay off.
         """
-        print("Starting blink loop.")
-        while True:
-            print("Mosfet ON")
-            self.mosfet.on()
-            sleep(on_time)
 
-            print("Mosfet OFF")
-            self.mosfet.off()
-            sleep(off_time)
+        self.mosfet.on()
+        sleep(on_time)
+
+        self.mosfet.off()
+        sleep(off_time)
 
     def set_pwm(self, percentage):
         """
