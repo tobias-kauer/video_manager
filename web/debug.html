@@ -23,6 +23,13 @@
     .button:hover {
       background-color: #0056b3;
     }
+    .input-field {
+      padding: 10px;
+      margin: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 100px;
+    }
   </style>
 </head>
 <body>
@@ -40,7 +47,27 @@
     <button class="button" onclick="changeState('debug')">Debug</button>
   </div>
 
+  <div class="container">
+    <h2>Camera Control</h2>
+    <label for="camera-speed">Move Speed:</label>
+    <input id="camera-speed" class="input-field" type="number" step="0.01" value="0.05">
+    <label for="camera-target">Target Position:</label>
+    <input id="camera-target" class="input-field" type="number" step="0.1" value="5">
+    <button class="button" onclick="moveCamera()">Move Camera</button>
+  </div>
+
+  <div class="container">
+    <h2>MOSFET Control</h2>
+    <p>Current MOSFET State: <span id="current-mosfet-state">pulse</span></p>
+    <h3>Change MOSFET State</h3>
+    <button class="button" onclick="changeMosfetState('blink')">Blink</button>
+    <button class="button" onclick="changeMosfetState('pulse')">Pulse</button>
+    <button class="button" onclick="changeMosfetState('off')">Off</button>
+    <button class="button" onclick="changeMosfetState('on')">On</button>
+  </div>
+
   <script type="text/javascript" src="eel.js"></script>
+
   <script>
     function updateCurrentState() {
       eel.get_state()().then(state => {
@@ -54,8 +81,27 @@
       });
     }
 
+    function moveCamera() {
+      const moveSpeed = parseFloat(document.getElementById('camera-speed').value);
+      const targetPosition = parseFloat(document.getElementById('camera-target').value);
+      eel.triggerCameraMovePY(moveSpeed, targetPosition)
+    }
+
+    function updateMosfetState() {
+      eel.get_mosfet_state()().then(state => {
+        document.getElementById('current-mosfet-state').textContent = state;
+      });
+    }
+
+    function changeMosfetState(newState) {
+      eel.set_mosfet_state(newState)().then(() => {
+        updateMosfetState(); // Refresh the MOSFET state display
+      });
+    }
+
     // Update the current state every second
     setInterval(updateCurrentState, 1000);
+    setInterval(updateMosfetState, 1000);
   </script>
 </body>
 </html>

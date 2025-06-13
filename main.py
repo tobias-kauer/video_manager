@@ -39,6 +39,13 @@ DEBUG_STATE = "debug"
 # Initialize the current state
 current_state = IDLE_STATE
 
+MOSEFET_BLINK = "blink"
+MOSFET_PULSE = "pulse"
+MOSFET_OFF = "off"
+MOSFET_ON = "on"
+
+current_mosfet_state = MOSFET_PULSE
+
 total_submissions = 124
 last_uuid = "000000"
 
@@ -113,13 +120,23 @@ def mosfet_controller():
     Continuously pulse the MOSFET in the background.
     """
     while True:
+        if get_mosfet_state() == MOSEFET_BLINK:
+            mosfet.blink(on_time=0.5, off_time=0.5)
+        elif get_mosfet_state() == MOSFET_PULSE:
+            mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.9)
+        elif get_mosfet_state() == MOSFET_OFF:
+            mosfet.set_pwm(0)
+        elif get_mosfet_state() == MOSFET_ON:
+            mosfet.set_pwm(100)
+
+    '''while True:
         if get_state() == IDLE_STATE:
             mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.9)  # Pulsate from 0% to 100%
         if get_state() == ROOM_STATE:
             mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.7)  # Pulsate from 0% to 100%
         if get_state() == CAMERA_STATE:
             mosfet.blink(on_time=2, off_time=2)
-            mosfet.set_pwm(100)  # Set MOSFET to 100% brightness
+            mosfet.set_pwm(100)  # Set MOSFET to 100% brightness'''
 def display_controller():
 
     """
@@ -162,6 +179,31 @@ def data_recorder():
             print("Recording completed. Switching to IDLE_STATE.")
             set_state(IDLE_STATE)  # Set the state to IDLE_STATEr
         time.sleep(1)  # Wait for 1 second before checking the state again
+
+@eel.expose
+def set_mosfet_state(new_state):
+    """
+    Set the global MOSFET state to the specified state.
+
+    Args:
+        new_state (str): The new MOSFET state (MOSEFET_BLINK, MOSFET_PULSE, MOSFET_OFF, MOSFET_ON).
+    """
+    global current_mosfet_state
+    current_mosfet_state = new_state
+    print(f"------------------------------------------------------------")
+    print(f"MOSFET state changed to: {current_mosfet_state}")
+    print(f"------------------------------------------------------------")
+
+@eel.expose
+def get_mosfet_state():
+    """
+    Get the current global MOSFET state.
+
+    Returns:
+        str: The current MOSFET state.
+    """
+    global current_mosfet_state
+    return current_mosfet_state
 
 
 @eel.expose
@@ -212,7 +254,13 @@ def get_total_submissions():
     print(f"Total submissions: {total_submissions}")
     return total_submissions
 
-
+@eel.expose
+def triggerCameraMovePY(move_speed, target_position):
+    """
+    Trigger the camera move from Python.
+    """
+    print("Camera move triggered from Python!")
+    return eel.triggerCameraMove(move_speed, target_position)  # Calls the JS function
 
 
 @eel.expose

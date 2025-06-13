@@ -3,6 +3,7 @@ TEXT_FADE_OUT = 1;
 TEXT_STAY_DURATION = 3;
 EASE = "power2.out";
 
+
 function startAnimationTopIdle() {
     // Create a GSAP timeline
     const timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
@@ -117,44 +118,91 @@ function startAnimationTopIdle() {
       display: "none", // Hide it after fading out
     });
 
+    timeline.to("#idle-animation-6", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex", // Ensure it is displayed
+    })
+    .to("#idle-animation-6", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION*1.5, // Duration to stay visible
+    })
+    .to("#idle-animation-6", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT, // Duration of fade-out
+      ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });
+
     
   
   }
 
   function resetScrollPosition() {
-    const list = document.getElementById("scroll-list");
-    gsap.set(list, { y: 0 }); // Reset the scroll position to the top
+    const list1 = document.getElementById("scroll-list-1");
+    const list2 = document.getElementById("scroll-list-2");
+    const list3 = document.getElementById("scroll-list-3");
+  
+    console.log("List 1:", list1);
+    console.log("List 2:", list2);
+    console.log("List 3:", list3);
+  
+    if (!list1 || !list2 || !list3) {
+      console.warn("One or more lists are not found in the DOM.");
+      return;
+    }
+  
+    gsap.set(list1, { y: 0 }); // Reset the scroll position to the top
+    gsap.set(list2, { y: 0 });
+    gsap.set(list3, { y: 0 });
   }
 
   function startScrollingList() {
-    const list = document.getElementById("scroll-list");
+    const lists = [
+      document.getElementById("scroll-list-1"),
+      document.getElementById("scroll-list-2"),
+      document.getElementById("scroll-list-3"), // Add more lists as needed
+    ];
     const container = document.getElementById("scroll-container");
   
-    // Temporarily make the container visible to calculate heights
+    // Temporarily make the container and lists visible to calculate heights
     container.style.display = "block";
+    lists.forEach((list) => {
+      if (list) list.style.display = "block";
+    });
   
-    const listHeight = list.offsetHeight; // Total height of the list
     const containerHeight = container.offsetHeight; // Height of the visible container
-  
-    // Restore the original display property
-    container.style.display = "";
-  
-    // Debugging: Log the heights
-    console.log("List Height:", listHeight);
     console.log("Container Height:", containerHeight);
   
-    // Check if the list is taller than the container
-    if (listHeight > containerHeight) {
-      // Animate the list to scroll upwards
+    lists.forEach((list, index) => {
+      if (!list) {
+        console.warn(`List ${index + 1} not found.`);
+        return;
+      }
+  
+      const listHeight = list.offsetHeight; // Total height of the current list
+      console.log(`List ${index + 1} Height:`, listHeight);
+  
+      // Reset the scroll position to the top
+      gsap.set(list, { y: 0 });
+  
+      // Ensure the list scrolls even if it's smaller than the container
+      const scrollDistance = Math.max(listHeight - containerHeight, 100); // Minimum scroll distance is 100px
+  
       gsap.to(list, {
-        y: -(listHeight - containerHeight), // Scroll the list upwards
+        y: -scrollDistance, // Scroll the list upwards
         duration: 10, // Duration of the scrolling animation
         ease: "linear",
         repeat: -1, // Repeat the scrolling infinitely
       });
-    } else {
-      console.warn("List height is smaller than container height. No scrolling needed.");
-    }
+    });
+  
+    // Restore the original display property
+    container.style.display = "";
+    lists.forEach((list) => {
+      if (list) list.style.display = "";
+    });
   }
   
   function stopScrollingList() {

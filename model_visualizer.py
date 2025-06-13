@@ -24,7 +24,7 @@ BATCH_SIZE = 64
 EPOCHS = 100
 IMAGE_SIZE = 64
 DEVICE = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
-MODEL_PATH = "model/dcgan_noBG_generator_030.pth"
+MODEL_PATH = "model/dcgan_noBG_processed_generator_0100.pth"
 OUTPUT_FOLDER = "web/data/tsne_images"
 OUTPUT_FILE = "tsne_output.json"
 image_path = "frame_user_001_00924.png"  # Path to the input image
@@ -388,7 +388,7 @@ def modelviz_train(uuid="000000"):
         dcgan_generator, 
         latent_dim=LATENT_DIM, 
         num_samples=1000, 
-        reduction_method="pca", 
+        reduction_method="tsne", 
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,

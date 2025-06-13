@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 
 
+const similarity_threshold = 64; // Threshold for similarity detection
+const camera_position_z = 100; // Initial camera position on the z-axis
+
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -21,7 +24,7 @@ const enableSimilarityBackground = true; // Flag to enable/disable similarity-ba
 const group = new THREE.Group();
 scene.add(group);
 
-camera.position.z = 100;
+camera.position.z = camera_position_z;
 
 // Center the sprite group in the scene
 group.position.set(0, 0, 0);
@@ -52,7 +55,7 @@ function loadSprites(data) {
       sprite.scale.set(scale, scale, 1);
 
       // Add similarity-based background if enabled
-      if (enableSimilarityBackground && item.similarity > 60) {
+      if (enableSimilarityBackground && item.similarity > similarity_threshold) {
         const similarity = item.similarity || 0; // Default to 0 if similarity is not defined
         const redOpacity = similarity / 200; // Scale similarity to opacity (0 to 1)
 
@@ -101,11 +104,50 @@ function onWindowResize() {
 window.addEventListener('resize', onWindowResize, false);
 
 
+
+let animationComplete = false; // Flag to indicate when the animation is done
+
+function moveCamera(moveSpeed, targetPosition) {
+    animationComplete = false; // Reset the flag
+
+    function animateCamera() {
+        // Check if the camera is close enough to the target position
+        if (Math.abs(camera.position.z - targetPosition) <= moveSpeed) {
+            camera.position.z = targetPosition; // Snap to the target position
+            animationComplete = true; // Set the flag to true
+            return; // Stop the animation
+        }
+
+        // Move the camera towards the target position
+        if (camera.position.z < targetPosition) {
+            camera.position.z += moveSpeed; // Move forward
+        } else if (camera.position.z > targetPosition) {
+            camera.position.z -= moveSpeed; // Move backward
+        }
+
+        // Continue animating
+        requestAnimationFrame(animateCamera);
+    }
+
+    // Start the animation
+    animateCamera();
+}
+
+// Example usage in your Eel application
+eel.expose(triggerCameraMove);
+function triggerCameraMove(moveSpeed, targetPosition) {
+    moveCamera(moveSpeed, targetPosition);
+    return animationComplete; // Return the flag when the animation is done
+}
+
+
 // Animation loop
 let movingForward = false;
 let movingBackward = false;
 let moveTarget = 2; // Target position when moving forward
 let moveSpeed = 0.05; // Speed of movement
+
+
 
 // Animation loop
 function animate() {
@@ -124,9 +166,9 @@ function animate() {
     }
   
     // Handle moving backward
-    if (movingBackward && camera.position.z < 10) {
+    if (movingBackward && camera.position.z < camera_position_z) {
         camera.position.z += moveSpeed;
-        if (camera.position.z >= 10) {
+        if (camera.position.z >= camera_position_z) {
             movingBackward = false; // Stop moving backward
         }
     }
