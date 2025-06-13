@@ -1,9 +1,7 @@
 import * as THREE from 'three';
 
-
 const similarity_threshold = 64; // Threshold for similarity detection
 const camera_position_z = 100; // Initial camera position on the z-axis
-
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -19,7 +17,6 @@ const scale = 4;
 const speed = 0.002;
 const maxPoints = 1000;
 const selectedFile = 'data/tsne_images/tsne_output.json';
-const enableSimilarityBackground = true; // Flag to enable/disable similarity-based backgrounds
 
 const group = new THREE.Group();
 scene.add(group);
@@ -29,7 +26,7 @@ camera.position.z = camera_position_z;
 // Center the sprite group in the scene
 group.position.set(0, 0, 0);
 
-function loadSprites(data) {
+function loadSprites(data, enableSimilarityBackground) {
   const loader = new THREE.TextureLoader();
   const limitedSprites = data.slice(0, Math.min(maxPoints, data.length));
 
@@ -78,17 +75,40 @@ function loadSprites(data) {
 }
 
 console.log(`Fetching file from: /${selectedFile}`);
-fetch(`/${selectedFile}`)
-  .then((res) => res.json())
-  .then(loadSprites)
-  .catch((err) => console.error('Failed to load sprite data:', err));
-/*
-console.log('Sprite data loaded, starting animation...');
-function animate() {
-  requestAnimationFrame(animate);
-  group.rotation.y += speed;
-  renderer.render(scene, camera);
-}*/
+
+fetch(selectedFile)
+  .then((response) => response.json())
+  .then((data) => {
+    loadSprites(data, false); // Enable similarity-based background
+  })
+  .catch((error) => {
+    console.error("Error loading sprites:", error);
+  });
+
+  function reloadSprites(enableBackground) {
+    // Clear existing sprites
+    while (group.children.length > 0) {
+      group.remove(group.children[0]);
+    }
+  
+    console.log("Cleared existing sprites.");
+  
+    // Update the flag for similarity-based background
+    //enableSimilarityBackground = enableBackground;
+  
+    // Load the JSON file and reload sprites
+    fetch(selectedFile)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Loaded data:", data);
+        loadSprites(data, enableBackground); // Reload sprites
+      })
+      .catch((error) => {
+        console.error("Error loading sprites:", error);
+      });
+  }
+eel.expose(reloadSprites); // Expose the reload function to Eel
+
 
 // Handle window resize
 function onWindowResize() {
@@ -103,8 +123,6 @@ function onWindowResize() {
 // Add event listener for window resize
 window.addEventListener('resize', onWindowResize, false);
 
-
-
 let animationComplete = false; // Flag to indicate when the animation is done
 
 function moveCamera(moveSpeed, targetPosition) {
@@ -117,7 +135,6 @@ function moveCamera(moveSpeed, targetPosition) {
             animationComplete = true; // Set the flag to true
             return; // Stop the animation
         }
-
         // Move the camera towards the target position
         if (camera.position.z < targetPosition) {
             camera.position.z += moveSpeed; // Move forward
@@ -146,8 +163,6 @@ let movingForward = false;
 let movingBackward = false;
 let moveTarget = 2; // Target position when moving forward
 let moveSpeed = 0.05; // Speed of movement
-
-
 
 // Animation loop
 function animate() {

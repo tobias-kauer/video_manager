@@ -3,10 +3,28 @@ TEXT_FADE_OUT = 1;
 TEXT_STAY_DURATION = 3;
 EASE = "power2.out";
 
+let timeline;
 
-function startAnimationTopIdle() {
+
+  function startAnimationTopIdle() {
+    // Clear all running animations in the window
+    gsap.killTweensOf("*");
+
+    if (timeline) {
+      timeline.kill();
+    }
+    
+    // Ensure the correct elements are visible and hidden before the animation starts
+    document.getElementById("room-animation").style.display = "none"; // Hide room-animation
+    document.getElementById("room-animation").style.opacity = 0;
+    
+    document.getElementById("idle-animation").style.display = "flex"; // Show idle-animation
+    document.getElementById("idle-animation").style.opacity = 1;
+    document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
+    document.getElementById("camera-animation").style.opacity = 0;
+    
     // Create a GSAP timeline
-    const timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
   
     // Animate the first element (#idle-animation-1)
     timeline.to("#idle-animation-1", {
@@ -26,51 +44,89 @@ function startAnimationTopIdle() {
       display: "none", // Hide it after fading out
     });
 
-    timeline.to("#idle-animation-2", {
+  }
+  function startAnimationTopRoom() {
+    // Clear all running animations in the window
+    gsap.killTweensOf("*");
+
+    if (timeline) {
+      timeline.kill();
+    }
+
+    // Ensure the correct elements are visible and hidden before the animation starts
+    document.getElementById("idle-animation").style.display = "none"; // Show idle-animation
+    document.getElementById("idle-animation").style.opacity = 0;
+    document.getElementById("room-animation").style.display = "flex"; // Hide room-animation
+    document.getElementById("room-animation").style.opacity = 1;
+    document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
+    document.getElementById("camera-animation").style.opacity = 0;
+
+    // Create a GSAP timeline
+    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+  
+    // Animate the first element (#idle-animation-1)
+    timeline.to("#room-animation-1", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex", // Ensure it is displayed
+    })
+    .to("#room-animation-1", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION, // Duration to stay visible
+    })
+    .to("#room-animation-1", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT, // Duration of fade-out
+      ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });
+
+    timeline.to("#room-animation-2", {
       opacity: 1, // Fade in the container
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
       display: "flex",
     })
-    .to("#idle-animation-2a", {
+    .to("#room-animation-2a", {
       opacity: 1, // Fade in the first sub-element
       duration: TEXT_FADE_IN / 2, // Half the duration of the container fade-in
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
     })
-    .to("#idle-animation-2b", {
+    .to("#room-animation-2b", {
       opacity: 1, // Fade in the second sub-element
       duration: TEXT_FADE_IN / 2, // Duration of fade-in for the second sub-element
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
     }, `+=${TEXT_STAY_DURATION / 2}`) // Start halfway through the stay duration
-    .to("#idle-animation-2", {
+    .to("#room-animation-2", {
       opacity: 1, // Keep the container visible
       duration: TEXT_STAY_DURATION, // Duration to stay visible
     })
-    .to("#idle-animation-2", {
+    .to("#room-animation-2", {
       opacity: 0, // Fade out the container
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
       display: "none", // Hide it after fading out
     });
 
-    timeline.to("#idle-animation-3", {
+    timeline.to("#room-animation-3", {
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
       onStart: () => {
-        document.getElementById("idle-animation-3").style.display = "flex"; // Ensure visibility
+        document.getElementById("room-animation-3").style.display = "flex"; // Ensure visibility
         resetScrollPosition(); // Reset the scroll position to the top
         startScrollingList(); // Start scrolling the list
       },
     })
-    .to("#idle-animation-3", {
+    .to("#room-animation-3", {
       opacity: 1, // Keep visible
       duration: TEXT_STAY_DURATION*2, // Duration to stay visible
     })
-    .to("#idle-animation-3", {
+    .to("#room-animation-3", {
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
@@ -78,22 +134,22 @@ function startAnimationTopIdle() {
       onComplete: () => stopScrollingList(), // Stop scrolling the list when hidden
     });
 
-    timeline.to("#idle-animation-4", {
+    timeline.to("#room-animation-4", {
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
       onStart: () => {
-        document.getElementById("idle-animation-4").style.display = "flex"; // Ensure visibility
+        document.getElementById("room-animation-4").style.display = "flex"; // Ensure visibility
         resetScrollPosition(); // Reset the scroll position to the top
         startScrollingList(); // Start scrolling the list
       },
     })
-    .to("#idle-animation-4", {
+    .to("#room-animation-4", {
       opacity: 1, // Keep visible
       duration: TEXT_STAY_DURATION, // Duration to stay visible
     })
-    .to("#idle-animation-4", {
+    .to("#room-animation-4", {
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
@@ -101,41 +157,39 @@ function startAnimationTopIdle() {
       onComplete: () => stopScrollingList(), // Stop scrolling the list when hidden
     });
 
-    timeline.to("#idle-animation-5", {
+    timeline.to("#room-animation-5", {
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
     })
-    .to("#idle-animation-5", {
+    .to("#room-animation-5", {
       opacity: 1, // Keep visible
       duration: TEXT_STAY_DURATION, // Duration to stay visible
     })
-    .to("#idle-animation-5", {
+    .to("#room-animation-5", {
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
       display: "none", // Hide it after fading out
     });
 
-    timeline.to("#idle-animation-6", {
+    timeline.to("#room-animation-6", {
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
       display: "flex", // Ensure it is displayed
     })
-    .to("#idle-animation-6", {
+    .to("#room-animation-6", {
       opacity: 1, // Keep visible
       duration: TEXT_STAY_DURATION*1.5, // Duration to stay visible
     })
-    .to("#idle-animation-6", {
+    .to("#room-animation-6", {
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
       display: "none", // Hide it after fading out
     });
-
-    
   
   }
 
@@ -157,7 +211,6 @@ function startAnimationTopIdle() {
     gsap.set(list2, { y: 0 });
     gsap.set(list3, { y: 0 });
   }
-
   function startScrollingList() {
     const lists = [
       document.getElementById("scroll-list-1"),
@@ -203,8 +256,7 @@ function startAnimationTopIdle() {
     lists.forEach((list) => {
       if (list) list.style.display = "";
     });
-  }
-  
+  } 
   function stopScrollingList() {
     // Stop the scrolling animation
     gsap.killTweensOf("#scroll-list");
@@ -212,6 +264,7 @@ function startAnimationTopIdle() {
   
   // Expose to Python
   eel.expose(startAnimationTopIdle);
+  eel.expose(startAnimationTopRoom);
   
   // Optionally trigger on load
   window.onload = () => {

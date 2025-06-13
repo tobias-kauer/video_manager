@@ -253,33 +253,6 @@ def generate_dimensionality_reduction_visualization(
                         "imageUrl": image_path
                     })
 
-    '''output = []
-    for i, latent_vector in enumerate(z):
-        with torch.no_grad():
-            generated_image = generator(latent_vector.unsqueeze(0)).cpu()  # Shape: [1, C, H, W]
-            generated_image = (generated_image + 1) / 2  # Normalize to [0, 1]
-
-            if use_base64:
-                # Convert image to base64
-                import io
-                import base64
-                buffer = io.BytesIO()
-                save_image(generated_image, buffer, format="PNG", normalize=True)
-                buffer.seek(0)
-                base64_image = f"data:image/png;base64,{base64.b64encode(buffer.read()).decode('utf-8')}"
-                output.append({
-                    "position": z_reduced[i].tolist(),
-                    "imageUrl": base64_image
-                })
-            else:
-                # Save image to file
-                image_path = os.path.join(output_folder, f"image_{i:03d}.png")
-                save_image(generated_image, image_path, normalize=True)
-                output.append({
-                    "position": z_reduced[i].tolist(),
-                    "imageUrl": image_path
-                })
-'''
     # Save the output as a JSON file
     with open(output_json, "w") as json_file:
         json.dump(output, json_file, indent=4)
@@ -288,7 +261,7 @@ def generate_dimensionality_reduction_visualization(
     return output
 
 def generate_dimensionality_reduction_visualization_with_similarity_analysis(
-    generator, latent_dim, num_samples=100, reduction_method="tsne", output_folder="reduced_images", use_base64=False, output_json="output.json", similarity_vector=None
+    generator, latent_dim, num_samples=100, reduction_method="tsne", output_folder="reduced_images", use_base64=False, output_json="output.json", similarity_vector=None, batch_size=100
 ):
     """
     Generate images and visualize them in 3D space using t-SNE or PCA reduction.
@@ -326,43 +299,51 @@ def generate_dimensionality_reduction_visualization_with_similarity_analysis(
     else:
         raise ValueError("Invalid reduction method. Choose 'tsne' or 'pca'.")
 
-    # Step 3: Generate images and prepare output
+    # Step 3: Process latent vectors in batches
     output = []
-    for i, latent_vector in enumerate(z):
-        with torch.no_grad():
-            generated_image = generator(latent_vector.unsqueeze(0)).cpu()  # Shape: [1, C, H, W]
-            generated_image = (generated_image + 1) / 2  # Normalize to [0, 1]
+    num_batches = (num_samples + batch_size - 1) // batch_size  # Calculate the number of batches
+    for batch_idx in range(num_batches):
+        start_idx = batch_idx * batch_size
+        end_idx = min(start_idx + batch_size, num_samples)
+        batch_z = z[start_idx:end_idx]
+        batch_z_reduced = z_reduced[start_idx:end_idx]
 
-            # Calculate similarity score
-            similarity_score = calculate_similarity(similarity_vector, latent_vector, method="cosine")
+        print(f"Processing batch {batch_idx + 1}/{num_batches}...")
 
+        for i, latent_vector in enumerate(batch_z):
+            with torch.no_grad():
+                generated_image = generator(latent_vector.unsqueeze(0)).cpu()  # Shape: [1, C, H, W]
+                generated_image = (generated_image + 1) / 2  # Normalize to [0, 1]
 
-            if use_base64:
-                # Convert image to base64
-                import io
-                import base64
-                buffer = io.BytesIO()
-                save_image(generated_image, buffer, format="PNG", normalize=True)
-                buffer.seek(0)
-                base64_image = f"data:image/png;base64,{base64.b64encode(buffer.read()).decode('utf-8')}"
-                output.append({
-                    "position": z_reduced[i].tolist(),
-                    "imageUrl": base64_image,
-                    "similarity": float(similarity_score)
-                })
-            else:
-                # Save image to file
-                image_path = os.path.join(images_folder, f"image_{i:03d}.png")
-                save_image(generated_image, image_path, normalize=True)
+                # Calculate similarity score
+                similarity_score = calculate_similarity(similarity_vector, latent_vector, method="cosine")
 
-                # Construct relative path for the image URL
-                relative_image_path = os.path.relpath(image_path, start=output_folder)
+                if use_base64:
+                    # Convert image to base64
+                    import io
+                    import base64
+                    buffer = io.BytesIO()
+                    save_image(generated_image, buffer, format="PNG", normalize=True)
+                    buffer.seek(0)
+                    base64_image = f"data:image/png;base64,{base64.b64encode(buffer.read()).decode('utf-8')}"
+                    output.append({
+                        "position": batch_z_reduced[i].tolist(),
+                        "imageUrl": base64_image,
+                        "similarity": float(similarity_score)
+                    })
+                else:
+                    # Save image to file
+                    image_path = os.path.join(images_folder, f"image_{start_idx + i:03d}.png")
+                    save_image(generated_image, image_path, normalize=True)
 
-                output.append({
-                    "position": z_reduced[i].tolist(),
-                    "imageUrl": relative_image_path,
-                    "similarity": float(similarity_score)
-                })
+                    # Construct relative path for the image URL
+                    relative_image_path = os.path.relpath(image_path, start=output_folder)
+
+                    output.append({
+                        "position": batch_z_reduced[i].tolist(),
+                        "imageUrl": relative_image_path,
+                        "similarity": float(similarity_score)
+                    })
 
     # Save the output as a JSON file in the specified folder
     json_path = os.path.join(output_folder, output_json)
@@ -392,5 +373,6 @@ def modelviz_train(uuid="000000"):
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,
-        similarity_vector=invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE)
+        similarity_vector=invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE),
+        batch_size=100
     )

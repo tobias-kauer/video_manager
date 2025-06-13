@@ -7,9 +7,10 @@ from mosfet import *
 from platform_manager import is_raspberry_pi
 from segment_display import *
 from model_visualizer import *
+import time
 
 debug_mode = True  # Set to True to enable debug mode
-disable_sensors = True  # Set to True to disable sensors
+disable_sensors = False  # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -82,7 +83,6 @@ def monitor_sensors():
     """
     Continuously monitor both sensors and trigger a function if a threshold is crossed.
     """
-
     while True:
 
         if get_state() == IDLE_STATE and not disable_sensors:
@@ -91,15 +91,11 @@ def monitor_sensors():
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
 
-                #trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
- 
                 #eel.startRecordingEvent()  # Trigger the recording event in the frontend
 
             if sensorRoom.is_object_within_range(SENSOR_ROOM_THRESHOLD):
                 print(f"Sensor Room triggered! Distance: {sensorRoom.get_distance():.2f} cm")
                 set_state(ROOM_STATE)
-
-                #trigger_function(sensor_name="Sensor Room", distance=sensorRoom.get_distance())
 
         if get_state() == ROOM_STATE and not disable_sensors:
 
@@ -109,28 +105,53 @@ def monitor_sensors():
 
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
 
-                #trigger_function(sensor_name="Sensor Camera", distance=sensorCamera.get_distance())
-                sensor_camera_manual_trigger = False  # Reset manual trigger flag
+        time.sleep(0.5)  # Adjust the polling interval as needed
 
-                #eel.startRecordingEvent()  # Trigger the recording event in the frontend
-
-        time.sleep(0.1)  # Adjust the polling interval as needed
 def mosfet_controller():
     """
     Continuously pulse the MOSFET in the background.
     """
     while True:
         if get_mosfet_state() == MOSEFET_BLINK:
+            mosfet.interrupt = True
+            while mosfet.is_running:  # Wait for the current operation to finish
+                time.sleep(0.1)
+
+            # Reset the interrupt flag for the next operation
+            mosfet.interrupt = False
             mosfet.blink(on_time=0.5, off_time=0.5)
         elif get_mosfet_state() == MOSFET_PULSE:
-            #mosfet.pulse_smooth_with_range(duration=15, steps=1000, min_brightness=0.4, max_brightness=1)
-            mosfet.pulse_smooth(duration=20, steps=200)
+
+            mosfet.interrupt = True
+            while mosfet.is_running:  # Wait for the current operation to finish
+                time.sleep(0.1)
+
+            # Reset the interrupt flag for the next operation
+            mosfet.interrupt = False
+
+            mosfet.pulse_smooth_with_range(duration=15, steps=200, min_brightness=0.4, max_brightness=1)
+            #mosfet.pulse_smooth(duration=20, steps=200)
 
         elif get_mosfet_state() == MOSFET_OFF:
+
+            mosfet.interrupt = True
+            while mosfet.is_running:  # Wait for the current operation to finish
+                time.sleep(0.1)
+
+            # Reset the interrupt flag for the next operation
+            mosfet.interrupt = False
+
             mosfet.set_pwm(0)
         elif get_mosfet_state() == MOSFET_ON:
+
+            mosfet.interrupt = True
+            while mosfet.is_running:  # Wait for the current operation to finish
+                time.sleep(0.1)
+
+            # Reset the interrupt flag for the next operation
+            mosfet.interrupt = False
+
             mosfet.set_pwm(60)
-            sleep(5)
 
 
     '''while True:
@@ -154,30 +175,18 @@ def display_controller():
         segmentDisplay.display_number(total_submissions)  # Display the total submissions
         time.sleep(2)
         segmentDisplay.clear_display() 
+def start_training_thread():
+    """
+    Start the training process in a separate thread.
+    """
+    def training_task():
+        print("Training started...")
+        modelviz_train("000000")  # Replace with your actual training function
+        print("Training completed. Switching to VISUALIZING_STATE.")
+        set_state(VISUALIZING_STATE)  # Switch to VISUALIZING_STATE after training
 
-def model_trainer():
-    """
-    Reload the model in a separate thread to avoid blocking the main application.
-    """
-    while True:
-            # Check if the current state is TRAINING_STATE
-            if get_state() == TRAINING_STATE:
-                print("Training started...")
-                modelviz_train("0000000")  # Execute the model training logic
-                print("Training completed. Switching to VISUALIZING_STATE.")
-                set_state(VISUALIZING_STATE)  # Set the state to VISUALIZING_STATE
-            time.sleep(1)  # Wait for 1 second before checking the state again
-def data_recorder():
-    """
-    Record video data in a separate thread to avoid blocking the main application.
-    """
-    while True:
-        if get_state() == RECORDING_STATE:
-            print("Recording started...")
-            eel.startRecordingEvent()
-            print("Recording completed. Switching to IDLE_STATE.")
-            set_state(IDLE_STATE)  # Set the state to IDLE_STATEr
-        time.sleep(1)  # Wait for 1 second before checking the state again
+    # Start the training task in a new thread
+    threading.Thread(target=training_task).start()
 
 @eel.expose
 def set_mosfet_state(new_state):
@@ -204,7 +213,6 @@ def get_mosfet_state():
     global current_mosfet_state
     return current_mosfet_state
 
-
 @eel.expose
 def set_state(new_state):
     """
@@ -219,6 +227,24 @@ def set_state(new_state):
     print(f"State changed to: {current_state}")
     print(f"------------------------------------------------------------")
 
+    if current_state == IDLE_STATE:
+        eel.startAnimationTopIdle()
+        eel.reloadSprites(False)
+    elif current_state == ROOM_STATE:
+        eel.startAnimationTopRoom()
+    elif current_state == CAMERA_STATE:
+        print("Camera state detected. Starting recording...")
+        eel.startRecordingEvent()
+        print("Recording completed. Switching to IDLE_STATE.")
+        set_state(IDLE_STATE)
+    elif current_state == TRAINING_STATE:
+        start_training_thread()
+        print("Training state detected. Starting training...")
+    elif current_state == VISUALIZING_STATE:
+        print("Visualizing state detected. Starting model visualization...")
+        eel.reloadSprites(True)
+
+    
 @eel.expose
 def get_state():
     """
@@ -308,16 +334,10 @@ mosfet_thread.start()
 display_thread = threading.Thread(target=display_controller, daemon=True)
 display_thread.start()
 
-# Start the training thread
-training_thread = threading.Thread(target=model_trainer, daemon=True)
-training_thread.start()
-
-# Start the data recorder thread
-data_recorder_thread = threading.Thread(target=data_recorder, daemon=True)
-data_recorder_thread.start()
 
 
-eel.start('index.html', size=(800 , 600), block=False)
+
+#eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
 #eel.start('animation.html', size=(800, 600))
 
