@@ -123,11 +123,15 @@ def mosfet_controller():
         if get_mosfet_state() == MOSEFET_BLINK:
             mosfet.blink(on_time=0.5, off_time=0.5)
         elif get_mosfet_state() == MOSFET_PULSE:
-            mosfet.pulse_smooth_with_range(duration=15, steps=1000, min_brightness=0.4, max_brightness=1)
+            #mosfet.pulse_smooth_with_range(duration=15, steps=1000, min_brightness=0.4, max_brightness=1)
+            mosfet.pulse_smooth(duration=20, steps=200)
+
         elif get_mosfet_state() == MOSFET_OFF:
             mosfet.set_pwm(0)
         elif get_mosfet_state() == MOSFET_ON:
-            mosfet.set_pwm(30)
+            mosfet.set_pwm(60)
+            sleep(5)
+
 
     '''while True:
         if get_state() == IDLE_STATE:

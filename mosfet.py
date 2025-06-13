@@ -12,7 +12,7 @@ class Mosfet:
             gpio_pin (int): The GPIO pin connected to the MOSFET.
         """
         self.mosfet = PWMLED(gpio_pin, frequency=frequency)
-        
+        self.current_pwm_value = None
 
     def on(self):
         """
