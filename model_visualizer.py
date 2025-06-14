@@ -369,7 +369,7 @@ def modelviz_train(uuid="000000"):
         dcgan_generator, 
         latent_dim=LATENT_DIM, 
         num_samples=256*4, 
-        reduction_method="tsne", 
+        reduction_method="pca", 
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,

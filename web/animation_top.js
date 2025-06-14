@@ -6,22 +6,46 @@ EASE = "power2.out";
 let timeline;
 
 
-  function startAnimationTopIdle() {
-    // Clear all running animations in the window
+// Function to start the idle animation at the top
+
+  function resetAnimation() {
+
     gsap.killTweensOf("*");
 
     if (timeline) {
       timeline.kill();
     }
+
+    document.getElementById("idle-animation").style.display = "none"; 
+    document.getElementById("room-animation").style.display = "none"; 
+    document.getElementById("camera-animation").style.display = "none";
     
-    // Ensure the correct elements are visible and hidden before the animation starts
-    document.getElementById("room-animation").style.display = "none"; // Hide room-animation
+    const elementsToReset = [
+      document.getElementById("idle-animation-1"),
+      document.getElementById("room-animation-1"),
+      document.getElementById("room-animation-2"),
+      document.getElementById("room-animation-3"),
+      document.getElementById("room-animation-4"),
+      document.getElementById("room-animation-5"),
+      document.getElementById("room-animation-6"),
+    ];
     
-    
-    document.getElementById("idle-animation").style.display = "flex"; // Show idle-animation
-    
-    document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
-    
+    elementsToReset.forEach((element) => {
+      if (element) {
+          element.style.display = "none"; // Hide all elements initially
+          element.style.opacity = 0; // Ensure opacity is reset
+      }
+    });
+
+    //special treatment
+    document.getElementById("room-animation-2a").style.opacity = 0; // Reset opacity of sub-element 2a
+    document.getElementById("room-animation-2b").style.opacity = 0; // Reset opacity of sub-element 2b
+
+  }
+  function startAnimationTopIdle() {
+
+    resetAnimation();
+    document.getElementById("idle-animation").style.display = "flex";
     
     // Create a GSAP timeline
     timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
@@ -47,19 +71,10 @@ let timeline;
   }
   function startAnimationTopRoom() {
     // Clear all running animations in the window
-    gsap.killTweensOf("*");
+    
+    resetAnimation();
 
-    if (timeline) {
-      timeline.kill();
-    }
-
-    // Ensure the correct elements are visible and hidden before the animation starts
-    document.getElementById("idle-animation").style.display = "none"; // Show idle-animation
-    
-    document.getElementById("room-animation").style.display = "flex"; // Hide room-animation
-    
-    document.getElementById("camera-animation").style.display = "none"; // Hide camera-animation
-    
+    document.getElementById("room-animation").style.display = "flex";
 
     // Create a GSAP timeline
     timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely

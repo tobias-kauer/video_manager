@@ -10,7 +10,7 @@ from model_visualizer import *
 import time
 
 debug_mode = True  # Set to True to enable debug mode
-disable_sensors = False # Set to True to disable sensors
+disable_sensors = True # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -51,6 +51,7 @@ total_submissions = 124
 last_uuid = "000000"
 
 
+
 # Check if running on a Raspberry Pi
 if is_raspberry_pi():
     print("Running on Raspberry Pi. Using real sensors and devices.")
@@ -78,6 +79,8 @@ lamp_brightness = 0
 
 print("Initializing Eel...")  # Starting EEl for the web interface
 eel.init('web')
+
+eel.updateModelInfoText("14.06.2025", total_submissions)
  
 def monitor_sensors():
     """
@@ -230,6 +233,7 @@ def set_state(new_state):
         eel.reloadSprites(False)
     elif current_state == ROOM_STATE:
         eel.startAnimationTopRoom()
+        eel.startAnimationSideRoom()
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
@@ -332,13 +336,11 @@ display_thread = threading.Thread(target=display_controller, daemon=True)
 display_thread.start()
 
 
-
+set_state(IDLE_STATE)  # Set the initial state to IDLE
 
 eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
-#eel.start('animation.html', size=(800, 600))
 
-#reload_model()  # Load the model visualizer with the initial UUID
 
 if debug_mode:
     eel.start('debug.html', size=(800, 600), block=False)

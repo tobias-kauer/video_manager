@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 const similarity_threshold = 64; // Threshold for similarity detection
-const camera_position_z = 100; // Initial camera position on the z-axis
+const camera_position_z = 10; // Initial camera position on the z-axis
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -13,9 +13,9 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 
 // Set up basic scene properties
 
-const scale = 4;
-const speed = 0.002;
-const maxPoints = 1000;
+const scale = 0.3;
+const speed = 0.005;
+const maxPoints = 1024;
 const selectedFile = 'data/tsne_images/tsne_output.json';
 
 const group = new THREE.Group();
@@ -152,7 +152,7 @@ function moveCamera(moveSpeed, targetPosition) {
 
 // Example usage in your Eel application
 eel.expose(triggerCameraMove);
-function triggerCameraMove(moveSpeed, targetPosition) {
+export function triggerCameraMove(moveSpeed, targetPosition) {
     moveCamera(moveSpeed, targetPosition);
     return animationComplete; // Return the flag when the animation is done
 }
