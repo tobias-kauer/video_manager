@@ -20,6 +20,7 @@ let timeline;
     document.getElementById("room-animation").style.display = "none"; 
     document.getElementById("camera-animation").style.display = "none";
     document.getElementById("training-animation").style.display = "none";
+    document.getElementById("visualization-animation").style.display = "none";
 
     
     
@@ -32,6 +33,8 @@ let timeline;
       document.getElementById("room-animation-5"),
       document.getElementById("room-animation-6"),
       document.getElementById("room-animation-7"),
+      document.getElementById("training-animation-1"),
+      document.getElementById("visualization-animation-1"),
     ];
     
     elementsToReset.forEach((element) => {
@@ -251,6 +254,7 @@ let timeline;
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN/2, // Duration of fade-in
       ease: "power2.out",
+      display: "flex", // Ensure it is displayed
     })
     .to("#training-animation-1", {
       opacity: 1, // Keep visible
@@ -260,6 +264,36 @@ let timeline;
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT/2, // Duration of fade-out
       ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });
+
+  }
+  function startAnimationTopVisualizing() {
+
+    resetAnimation();
+    document.getElementById("visualization-animation").style.display = "flex";
+    
+    // Create a GSAP timeline
+    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+  
+    // Animate the first element (#idle-animation-1)
+    timeline.to("#visualization-animation-1", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex", // Ensure it is displayed
+    })
+    .to("#visualization-animation-1", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION*10, // Duration to stay visible
+    })
+    .to("#visualization-animation-1", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT, // Duration of fade-out
+      ease: "power2.in",
+      display: "none",
+      onComplete: () => eel.set_state("idle"), // Stop scrolling the list when hidden
+       // Hide it after fading out
     });
 
   }
@@ -340,6 +374,7 @@ let timeline;
   eel.expose(startAnimationTopIdle);
   eel.expose(startAnimationTopRoom);
   eel.expose(startAnimationTopTraining);
+  eel.expose(startAnimationTopVisualizing);
   
   // Optionally trigger on load
   window.onload = () => {

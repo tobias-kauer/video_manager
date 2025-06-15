@@ -240,6 +240,7 @@ def set_state(new_state):
         eel.startAnimationTopIdle()
         eel.startAnimationSideIdle()
         eel.reloadSprites(False)
+        triggerCameraMovePY(0.05, 10)
     elif current_state == ROOM_STATE:
         set_mosfet_state(MOSFET_OFF)  # but later blinking
         eel.startAnimationTopRoom()
@@ -250,6 +251,7 @@ def set_state(new_state):
         set_mosfet_state(MOSFET_ON)  # Set MOSFET to pulse state
         eel.startRecordingEvent()
         eel.startAnimationSideCamera()
+        triggerCameraMovePY(0.05, 10)
     elif current_state == TRAINING_STATE:
         eel.startAnimationSideTraining()
         set_mosfet_state(MOSFET_OFF)
@@ -258,7 +260,10 @@ def set_state(new_state):
         start_training_thread()
         print("Training state detected. Starting training...")
     elif current_state == VISUALIZING_STATE:
+        triggerCameraMovePY(0.05, 10)
         eel.startAnimationSideVisualizing()
+        eel.generateImageGrid()
+        eel.startAnimationTopVisualizing()
         print("Visualizing state detected. Starting model visualization...")
         eel.reloadSprites(True)
         current_time = datetime.now().strftime("%d.%m.%Y, %H:%M:%S")

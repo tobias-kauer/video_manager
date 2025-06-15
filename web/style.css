@@ -132,6 +132,24 @@ body, html {
     word-wrap: break-word
   }
 
+  .medium-text {
+    width: 100%;
+    align-self: stretch; 
+    text-align: center; 
+    justify-content: center; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 0px;
+    margin: 0px;
+
+    color: white; 
+    font-size: 32px; 
+    font-family: IBM Plex Mono; 
+    font-weight: 500; 
+    line-height: 34px; 
+    word-wrap: break-word
+  }
+
   .small-text {
     width: 100%;
     align-self: stretch; 

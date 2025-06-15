@@ -120,6 +120,6 @@ function on_record_done(uuid) {
   eel.set_current_uuid(uuid)
   eel.process_frames(uuid); // Process the recording with the UUID
 
-  eel.set_state("idle"); // Set the state to idle after recording
+  eel.set_state("training"); // Set the state to idle after recording
   
 }
