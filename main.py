@@ -295,6 +295,7 @@ def set_current_uuid(uuid):
     print(f"Setting current UUID to: {uuid}")
     global last_uuid
     eel.updateUuidInfo(uuid)
+    eel.updateTokenDisplay(uuid)
     last_uuid = uuid
 
     increase_submissions()  # Increment the total submissions count

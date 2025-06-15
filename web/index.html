@@ -102,7 +102,7 @@
       
 
         <div id="room-animation-4" class="text-container" style="display: none; opacity: 0;">
-            <h1 class="main-text-smaller">...but is only developed by a handful of companies</h1>
+            <h1 class="main-text-smaller">...but is developed by just a few companies</h1>
 
             <div id="scroll-container">
               <ul id="scroll-list">
@@ -110,13 +110,14 @@
                 <li class="small-text">Google</li>
                 <li class="small-text">Meta</li>
                 <li class="small-text">Microsoft</li>
+                <li class="small-text">DeepSeek</li>
               </ul>
             </div>
         </div>
         
 
         <div id="room-animation-5" class="text-container" style="display: none; opacity: 0;">
-              <h1 class="main-text">...intransparently and undemocratic</h1>
+              <h1 class="main-text">...behind closed doors and undemocratic</h1>
         </div>
 
         <div id="room-animation-6" class="text-container" style="display: none; opacity: 0;">
@@ -125,8 +126,8 @@
         </div>
 
         <div id="room-animation-7" class="text-container" style="display: none; opacity: 0;">
-          <h1 class="medium-text">this is the start of a collective democratice AI model</h1>
-          <h1 class="medium-text">hold you hand underneath the light to train & join then model</h1>
+          <h1 class="medium-text">This is the beginning of a new kind of AI — collective and democratic</h1>
+          <h1 class="medium-text">Hold your hand beneath the light to train & shape the model</h1>
         </div>
 
     </div>
@@ -152,7 +153,7 @@
     <div id="training-animation" class="animation-container" style="display:none;">
 
       <div id="training-animation-1" class="text-container" style="display: none; opacity: 0;">
-        <h1 class="medium-text">Processing images and re-training the model<br>Can take up to 15 seconds</h1>
+        <h1 class="medium-text">Re-training the model<br>This can take up to 15 seconds</h1>
         <!--
         <div id="training-images-container" style="display: flex; justify-content: center; gap: 20px; padding-top: 20px;">
         </div>-->
@@ -162,12 +163,12 @@
     <div id="visualization-animation" class="animation-container" style="display:none;">
 
       <div id="visualization-animation-1" class="text-container" style="display: none; opacity: 0;">
-        <h1 class="medium-text" style="font-size: 46;">Your token is 142342</h1>
-        <h1 class="medium-text">Safe it to decide about the model in the future.</h1>
-        <div id="image-grid-container" style="display: flex; flex-direction: row; justify-content: center; align-items: center; position: relative; gap: 20px; padding-top: 20px;">
+        <h1 id="token-display" class="medium-text" style="font-size: 46px;">Your token is 0000000</h1>
+        <h1 class="medium-text">Save it — it lets you help guide the model in the future.</h1>
+        <div id="image-grid-container" style="width:100%; display: flex; flex-direction: row; justify-content: center; align-items: center; position: relative; gap: 20px; padding-top: 20px;">
           <!-- Grids will be dynamically added here -->
         </div>
-        <h1 class="medium-text">See the impact your training data had, marked in read on the model screen</h1>
+        <h1 class="medium-text">See the impact of your contribution, highlighted in red on the model screen.</h1>
       </div>
     </div>
 
@@ -182,8 +183,16 @@
     <script src="animation_top.js"></script>
 
     <script>
+
+    function updateTokenDisplay(uuid) {
+      const modelInfoElement = document.getElementById("token-display");
+      const newText = `Your token is ${uuid}`;
+      modelInfoElement.textContent = newText;
+    }
+
+    eel.expose(updateTokenDisplay);
       
-      function generateImageGrid(gridRows = 4, gridColumns = 10, foldersToShow = ["unprocessed"]) {
+      function generateImageGrid(gridRows = 4, gridColumns = 16, foldersToShow = ["unprocessed"]) {
         // Fetch the current UUID from Python
         eel.get_current_uuid()().then((uuid) => {
           if (!uuid) {
@@ -207,7 +216,7 @@
 
           // Define custom text for each grid
           const gridTexts = {
-            unprocessed: "Raw Images Grid",
+            unprocessed: uuid + " Dataset",
             noBG: "Background Removed Grid",
             processedColour: "Processed Images Grid",
           };
@@ -229,12 +238,12 @@
             gridWrapper.style.display = "flex";
             gridWrapper.style.flexDirection = "column";
             gridWrapper.style.alignItems = "center";
-            gridWrapper.style.margin = "20px";
+            gridWrapper.style.margin = "12px";
 
             // Create a container for the grid
             const gridContainer = document.createElement("div");
             gridContainer.style.display = "grid";
-            gridContainer.style.gridTemplateColumns = `repeat(${gridColumns}, 100px)`;
+            gridContainer.style.gridTemplateColumns = `repeat(${gridColumns}, 60px)`;
             gridContainer.style.gridGap = "10px";
 
             // Calculate the total number of images based on rows and columns
@@ -242,7 +251,7 @@
 
             // Create image elements for the grid
             for (let i = 0; i < totalImages; i++) {
-              const frameIndex = i * 5;
+              const frameIndex = i * 4;
               const img = document.createElement("img");
               img.style.width = "60px"; // Set image width
               img.style.height = "60px"; // Set image height
