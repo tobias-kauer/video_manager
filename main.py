@@ -151,7 +151,7 @@ def mosfet_controller():
                 set_mosfet_state(MOSFET_OFF)
             elif current_state == MOSFET_PULSE:
                 print("MOSFET state: PULSE")
-                mosfet.pulse_smooth_with_range(duration=15, steps=200, min_brightness=0.4, max_brightness=1)
+                mosfet.pulse_smooth_with_range(duration=5, steps=200, min_brightness=0.6, max_brightness=1)
             elif current_state == MOSFET_OFF:
                 print("MOSFET state: OFF")
                 mosfet.set_pwm(0)  # Set brightness to 0%

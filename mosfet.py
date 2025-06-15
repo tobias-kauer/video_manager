@@ -79,15 +79,15 @@ class Mosfet:
         self.is_running = True
         self.interrupt = False
 
-        # Gradually apply brightness values
-        for brightness in brightness_values:
-            if self.interrupt:
-                print("Pulse interrupted.")
-                break
-            self.mosfet.value = brightness
-            time.sleep(step_duration)
+        while not self.interrupt:
+            # Gradually apply brightness values
+            for brightness in brightness_values:
+                if self.interrupt:
+                    print("Pulse interrupted.")
+                    break
 
-        # Ensure the MOSFET returns to a stable state
+                self.mosfet.value = brightness
+                time.sleep(step_duration)
         self.mosfet.value = 0
         self.is_running = False
         print("Smooth pulse complete.")
