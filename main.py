@@ -12,7 +12,7 @@ import time
 import json
 
 debug_mode = True  # Set to True to enable debug mode
-disable_sensors = True # Set to True to disable sensors
+disable_sensors = False # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -127,7 +127,7 @@ def mosfet_controller():
     """
     Continuously pulse the MOSFET in the background.
     """
-    previous_state = None
+    previous_state = "pulse"
 
     while True:
         current_state = get_mosfet_state()
@@ -199,7 +199,7 @@ def start_training_thread():
 
 @eel.expose
 def set_mosfet_state(new_state):
-    """
+    """updateTrainingImages
     Set the global MOSFET state to the specified state.
 
     Args:
@@ -238,19 +238,23 @@ def set_state(new_state):
     print(f"------------------------------------------------------------")
 
     if current_state == IDLE_STATE:
+        set_mosfet_state(MOSFET_PULSE)  # Set MOSFET to pulse state
         eel.startAnimationTopIdle()
         eel.startAnimationSideIdle()
         eel.reloadSprites(False)
     elif current_state == ROOM_STATE:
+        set_mosfet_state(MOSFET_OFF)  # Set MOSFET to pulse state
         eel.startAnimationTopRoom()
         eel.startAnimationSideRoom()
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
+        set_mosfet_state(MOSFET_ON)  # Set MOSFET to pulse state
         eel.startAnimationSideCamera()
     elif current_state == TRAINING_STATE:
         eel.startAnimationSideTraining()
-        eel.updateTrainingImages()
+        set_mosfet_state(MOSFET_OFF)
+        #eel.updateTrainingImages()
         eel.startAnimationTopTraining()
         start_training_thread()
         print("Training state detected. Starting training...")
