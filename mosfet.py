@@ -118,21 +118,29 @@ class Mosfet:
 
     def blink(self, on_time=2, off_time=2):
         """
-        Blink the MOSFET on and off in a loop.
+        Blink the MOSFET on and off in a loop until interrupted.
 
         Args:
             on_time (int): Duration in seconds for the MOSFET to stay on.
             off_time (int): Duration in seconds for the MOSFET to stay off.
         """
+        print(f"Starting blink with on_time={on_time} and off_time={off_time}.")
+        self.is_running = True
+        self.interrupt = False
 
-        self.mosfet.on()
-        time.sleep(on_time)
+        while not self.interrupt:
+            self.mosfet.on()
+            time.sleep(on_time)
 
-        self.mosfet.off()
-        time.sleep(off_time)
+            if self.interrupt:  # Check if interrupted after turning on
+                break
 
+            self.mosfet.off()
+            time.sleep(off_time)
+
+        self.mosfet.off()  # Ensure the MOSFET is turned off after interruption
         self.is_running = False
-        print("Blink complete.")
+        print("Blink operation interrupted or completed.")
 
     def set_pwm(self, percentage):
         """
