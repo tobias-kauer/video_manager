@@ -124,17 +124,27 @@
           <h1 class="main-text-header">BELONGS IN OUR HANDS</h1>
         </div>
 
+        <div id="room-animation-7" class="text-container" style="display: none; opacity: 0;">
+          <h1 class="main-text">this is the start of a collective democratice AI model</h1>
+          <h1 class="main-text">hold you hand underneath the light to train & join then model</h1>
+        </div>
+
     </div>
 
     <div id="camera-animation" class="animation-container" style="display:none;">
-      <div id="countdown-container">
-        <span id="countdown-timer"></span>
-        <span id="blinking-dot" class="text-md" style="display:inline-block; width:20px; height:20px; background-color:red; border-radius:50%; margin-left:10px;"></span>
+      <div id="pre-recording-countdown" style="font-size: 24px; text-align: center; color: red; display: none;">
+        Hand detected, starting recording in: <span id="pre-countdown-timer">3</span>s
       </div>
-      <div class="image-container">
-        <img id="live-view" height="100%" />
+      <div id="recording-countdown" style="font-size: 24px; text-align: center; color: green; display: none;">
+        Recording: <span id="countdown-timer">10</span>s
+      </div>
+      <div id="blinking-dot" style="width: 10px; height: 10px; background-color: red; border-radius: 50%; display: inline-block;"></div>
+      <div id="live-view-container" class="image-container" style="display:none">
+        <img id="live-view" height="100%"/>
       </div>
     </div>
+
+
 
 
     <script type="text/javascript" src="eel.js"></script>

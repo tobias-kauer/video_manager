@@ -1,14 +1,42 @@
+const RECORDING_DURATION = 10; // Configurable recording duration in seconds
+
 function startRecordingEvent() {
     console.log("Event started!");
     document.getElementById('idle-animation').style.display = 'none';
     document.getElementById('room-animation').style.display = 'none';
     document.getElementById('camera-animation').style.display = 'block';
-    eel.record_data(); // Trigger Python side
-    startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
+
+    eel.record_data();
+
+    startPreRecordingCountdown(3, () => {
+
+      document.getElementById('live-view-container').style.display = 'flex';
+      startRecordingCountdown(RECORDING_DURATION);
+    });
   }
 
 // Expose the function to be called from Python
 eel.expose(startRecordingEvent);
+
+// Function to start the pre-recording countdown
+function startPreRecordingCountdown(duration, callback) {
+  const preCountdownTimer = document.getElementById('pre-countdown-timer');
+  const preRecordingCountdown = document.getElementById('pre-recording-countdown');
+  preRecordingCountdown.style.display = 'block';
+
+  let remainingTime = duration;
+
+  const preCountdownInterval = setInterval(() => {
+    preCountdownTimer.textContent = remainingTime;
+    remainingTime--;
+
+    if (remainingTime < 0) {
+      clearInterval(preCountdownInterval);
+      preRecordingCountdown.style.display = 'none'; // Hide the pre-recording countdown
+      callback(); // Trigger the callback to start the recording countdown
+    }
+  }, 1000);
+}
 
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Enter') {
@@ -19,6 +47,30 @@ document.addEventListener('keydown', function (e) {
     startCountdown(10); // Start the countdown with the duration (e.g., 10 seconds)
   }
 });
+
+// Function to start the recording countdown
+function startRecordingCountdown(duration) {
+  const countdownTimer = document.getElementById('countdown-timer');
+  const recordingCountdown = document.getElementById('recording-countdown');
+  const blinkingDot = document.getElementById('blinking-dot');
+
+  recordingCountdown.style.display = 'block';
+  blinkingDot.style.display = 'inline-block';
+
+  let remainingTime = duration;
+
+  const countdownInterval = setInterval(() => {
+    countdownTimer.textContent = remainingTime;
+    remainingTime--;
+
+    if (remainingTime < 0) {
+      clearInterval(countdownInterval);
+      recordingCountdown.style.display = 'none'; // Hide the recording countdown
+      blinkingDot.style.display = 'none'; // Hide the blinking dot
+      console.log("Recording complete!");
+    }
+  }, 1000);
+}
 
 // Function to start the countdown
 function startCountdown(duration) {
@@ -63,6 +115,9 @@ function on_record_done(uuid) {
   console.log("Recording finished: " + uuid);
   document.getElementById('camera-animation').style.display = 'none';
   document.getElementById('idle-animation').style.display = 'flex';
+  eel.set_current_uuid(uuid)
+  eel.process_frames(uuid); // Process the recording with the UUID
+
   eel.set_state("idle"); // Set the state to idle after recording
   
 }

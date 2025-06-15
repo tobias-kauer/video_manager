@@ -2,8 +2,7 @@ import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-#from torch.utils.data import DataLoader
-from torchvision import transforms, datasets, utils
+from torchvision import transforms
 from torchvision.utils import save_image
 
 from sklearn.manifold import TSNE
@@ -261,7 +260,7 @@ def generate_dimensionality_reduction_visualization(
     return output
 
 def generate_dimensionality_reduction_visualization_with_similarity_analysis(
-    generator, latent_dim, num_samples=100, reduction_method="tsne", output_folder="reduced_images", use_base64=False, output_json="output.json", similarity_vector=None, batch_size=100
+    generator, latent_dim, num_samples=100, reduction_method="tsne", output_folder="reduced_images", use_base64=False, output_json="output.json", similarity_vector=None, batch_size=100, overwrite=False
 ):
     """
     Generate images and visualize them in 3D space using t-SNE or PCA reduction.
@@ -292,7 +291,7 @@ def generate_dimensionality_reduction_visualization_with_similarity_analysis(
     # Step 2: Apply dimensionality reduction
     if reduction_method.lower() == "tsne":
         print("Using t-SNE for dimensionality reduction...")
-        z_reduced = TSNE(n_components=3).fit_transform(z.numpy())
+        z_reduced = TSNE(n_components=50).fit_transform(z.numpy())
     elif reduction_method.lower() == "pca":
         print("Using PCA for dimensionality reduction...")
         z_reduced = PCA(n_components=3).fit_transform(z.numpy())
@@ -345,18 +344,33 @@ def generate_dimensionality_reduction_visualization_with_similarity_analysis(
                         "similarity": float(similarity_score)
                     })
 
+
+    
     # Save the output as a JSON file in the specified folder
     json_path = os.path.join(output_folder, output_json)
     # Save the output as a JSON file
-    with open(json_path, "w") as json_file:
-        json.dump(output, json_file, indent=4)
-    print(f"Output saved as JSON: {json_path}")
+    if os.path.exists(json_path) and not overwrite:
+        print(f"Existing JSON file found: {json_path}. Overwriting first {num_samples} entries...")
+        with open(json_path, "r") as json_file:
+            existing_data = json.load(json_file)
+        
+        # Overwrite the first `num_samples` entries
+        existing_data[:num_samples] = output
+
+        # Save the updated data back to the file
+        with open(json_path, "w") as json_file:
+            json.dump(existing_data, json_file, indent=4)
+    else:
+        # Save the new data as a JSON file
+        with open(json_path, "w") as json_file:
+            json.dump(output, json_file, indent=4)
+
 
     return output
 
 
 
-def modelviz_train(uuid="000000"):
+def modelviz_train(uuid):
     '''original_vector = invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE)
 
     # Debug the vector
@@ -368,11 +382,12 @@ def modelviz_train(uuid="000000"):
     output = generate_dimensionality_reduction_visualization_with_similarity_analysis(
         dcgan_generator, 
         latent_dim=LATENT_DIM, 
-        num_samples=256*4, 
+        num_samples=256, 
         reduction_method="pca", 
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,
         similarity_vector=invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE),
-        batch_size=256
+        batch_size=256,
+        overwrite=False
     )

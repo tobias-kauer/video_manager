@@ -28,6 +28,7 @@ let timeline;
       document.getElementById("room-animation-4"),
       document.getElementById("room-animation-5"),
       document.getElementById("room-animation-6"),
+      document.getElementById("room-animation-7"),
     ];
     
     elementsToReset.forEach((element) => {
@@ -200,6 +201,23 @@ let timeline;
       duration: TEXT_STAY_DURATION*1.5, // Duration to stay visible
     })
     .to("#room-animation-6", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT, // Duration of fade-out
+      ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });
+
+    timeline.to("#room-animation-7", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex", // Ensure it is displayed
+    })
+    .to("#room-animation-7", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION*3, // Duration to stay visible
+    })
+    .to("#room-animation-7", {
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",

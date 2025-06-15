@@ -15,9 +15,10 @@ from platform_manager import is_raspberry_pi
 
 CAMERA = 0  # Default camera index (0 for the first camera)
 RESOLUTION = (640, 480)  # Default resolution
-DURATION = 10  # Default duration in seconds
+DURATION = 12  # Default duration in seconds
 DEFAULT_LOCATION = "videos/"  # Directory to save videos
 OUTOUT_IMAGE_SIZE = 480  # Size for square output images
+CAMERA_ACTIVATION_DELAY = 3  # Time in seconds to wait for the camera to activate
 
 def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCATION):
     """
@@ -38,18 +39,36 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
             os.makedirs(location)
 
         uuid_str = str(uuid.uuid4().int)[:6]
-        filename = f"{uuid_str}.mp4"
-        file_path = os.path.join(location, filename)
+        base_folder = os.path.join(location, uuid_str)
+        video_path = os.path.join(base_folder, f"{uuid_str}.mp4")
+        unprocessed_folder = os.path.join(base_folder, "unprocessed")
+
+        #filename = f"{uuid_str}.mp4"
+        #file_path = os.path.join(location, filename)
+
+        # Create the base folder and the unprocessed subfolder
+        os.makedirs(base_folder, exist_ok=True)
+        os.makedirs(unprocessed_folder, exist_ok=True)
 
         # Create a folder to save individual frames
-        frame_folder = os.path.join(location, uuid_str)
-        os.makedirs(frame_folder, exist_ok=True)
+        #frame_folder = os.path.join(location, uuid_str)
+        
+        #os.makedirs(frame_folder, exist_ok=True)
 
         cap = cv2.VideoCapture(CAMERA)
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, resolution[0])
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, resolution[1])
 
-        time.sleep(1.0)
+        # Wait for the camera to activate
+        print(f"Waiting {CAMERA_ACTIVATION_DELAY} seconds for the camera to activate...")
+        time.sleep(CAMERA_ACTIVATION_DELAY)
+
+        # Check if the camera is opened successfully
+        if not cap.isOpened():
+            print("Error: Unable to access the camera.")
+            return None, None
+
+        print("Camera activated. Starting recording...")
 
         # Set exposure via v4l2-ctl AFTER VideoCapture is opened
         # Set manual exposure after camera is opened
@@ -70,7 +89,7 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
         print("Exposure:", cap.get(cv2.CAP_PROP_EXPOSURE))
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(file_path, fourcc, 20.0, resolution)
+        out = cv2.VideoWriter(video_path, fourcc, 20.0, resolution)
 
         start_time = time.time()
         frame_count = 0  # Counter for naming frames
@@ -90,7 +109,7 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
             out.write(square_frame)
 
             # Save the frame as an image in the UUID folder
-            frame_filename = os.path.join(frame_folder, f"frame_{frame_count:04d}.jpg")
+            frame_filename = os.path.join(unprocessed_folder, f"frame_{frame_count:04d}.jpg")
             cv2.imwrite(frame_filename, square_frame)
             frame_count += 1
 
@@ -105,11 +124,11 @@ def record_video(duration=DURATION, resolution=RESOLUTION, location=DEFAULT_LOCA
         cap.release()
         out.release()
 
-        print(f"Video saved as: {filename}")
-        print(f"Frames saved in folder: {frame_folder}")
+        print(f"Video saved as: {video_path}")
+        print(f"Frames saved in folder: {unprocessed_folder}")
         eel.on_record_done(uuid_str)  # Notify the browser that recording is done
 
-        return file_path, uuid_str
+        return video_path, uuid_str
 
     # Run the recording in a separate thread
     threading.Thread(target=record).start()

@@ -7,6 +7,7 @@ from mosfet import *
 from platform_manager import is_raspberry_pi
 from segment_display import *
 from model_visualizer import *
+from datetime import datetime
 import time
 
 debug_mode = True  # Set to True to enable debug mode
@@ -49,8 +50,6 @@ current_mosfet_state = MOSFET_PULSE
 
 total_submissions = 124
 last_uuid = "000000"
-
-
 
 # Check if running on a Raspberry Pi
 if is_raspberry_pi():
@@ -182,7 +181,7 @@ def start_training_thread():
     """
     def training_task():
         print("Training started...")
-        modelviz_train("000000")  # Replace with your actual training function
+        modelviz_train(get_current_uuid)  # Replace with your actual training function
         print("Training completed. Switching to VISUALIZING_STATE.")
         set_state(VISUALIZING_STATE)  # Switch to VISUALIZING_STATE after training
 
@@ -230,6 +229,7 @@ def set_state(new_state):
 
     if current_state == IDLE_STATE:
         eel.startAnimationTopIdle()
+        eel.startAnimationSideIdle()
         eel.reloadSprites(False)
     elif current_state == ROOM_STATE:
         eel.startAnimationTopRoom()
@@ -237,6 +237,7 @@ def set_state(new_state):
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
+        eel.startAnimationSideCamera()
         #set_state(IDLE_STATE)
     elif current_state == TRAINING_STATE:
         start_training_thread()
@@ -244,6 +245,8 @@ def set_state(new_state):
     elif current_state == VISUALIZING_STATE:
         print("Visualizing state detected. Starting model visualization...")
         eel.reloadSprites(True)
+        current_time = datetime.now().strftime("%d.%m.%Y, %H:%M:%S")
+        eel.updateModelInfoText(current_time, total_submissions)
 
     
 @eel.expose
@@ -266,7 +269,7 @@ def set_current_uuid(uuid):
 @eel.expose
 def get_current_uuid():
     global last_uuid
-    print(f"Getting current UUID: {last_uuid}")
+    #print(f"Getting current UUID: {last_uuid}")
     return last_uuid
 
 @eel.expose
@@ -299,19 +302,22 @@ def record_data():
 def process_frames(uuid):
     print(f"Processing data for UUID: {uuid}")
 
-    input_dir = f"{VIDEO_LOCATION}{uuid}/"
-    output_dir = f"{VIDEO_LOCATION}{uuid}_noBG/"
+    # Define input and output directories for "no_BG"
+    input_dir = f"{VIDEO_LOCATION}{uuid}/unprocessed/"
+    no_bg_dir = f"{VIDEO_LOCATION}{uuid}/no_BG/"
+    os.makedirs(no_bg_dir, exist_ok=True)
 
-    # Process images in the input directory to remove idlebackground using skin mask
-    remove_background_skin_mask_directory(input_dir, output_dir, suffix="_noBG")
+    # Process images in the input directory to remove idle background using skin mask
+    print(f"Removing background for images in {input_dir}...")
+    remove_background_skin_mask_directory(input_dir, no_bg_dir, suffix="_noBG")
+    # Define input and output directories for "processed_colour"
+    processed_colour_dir = f"{VIDEO_LOCATION}{uuid}/processed_colour/"
+    os.makedirs(processed_colour_dir, exist_ok=True)
 
-    input_dir = f"{VIDEO_LOCATION}{uuid}_noBG/"
-    output_dir = f"{VIDEO_LOCATION}{uuid}_processed/"
-
-    # Process images in the input directory to replace transparent pixels with white,
+    # Process images in the "no_BG" directory to replace transparent pixels with white,
     # convert to black and white, and increase contrast
-
-    process_images_in_folder(input_dir, output_dir, suffix="_processed", replace_transparent=False)
+    print(f"Processing images in {no_bg_dir}...")
+    process_images_in_folder(no_bg_dir, processed_colour_dir, suffix="_processed")
 
     set_state(IDLE_STATE)  # Reset state to IDLE after processing
 
@@ -340,7 +346,6 @@ set_state(IDLE_STATE)  # Set the initial state to IDLE
 
 eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(720, 1000), block=False)
-
 
 if debug_mode:
     eel.start('debug.html', size=(800, 600), block=False)
