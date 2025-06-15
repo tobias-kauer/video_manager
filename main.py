@@ -22,7 +22,7 @@ BASE_SUBMISSIONS = 124  # Base number of submissions for the segment display
 
 # Threshold values for the sensors
 SENSOR_CAMERA_THRESHOLD = 20  # cm
-SENSOR_ROOM_THRESHOLD = 90  # cm
+SENSOR_ROOM_THRESHOLD = 60  # cm
 
 # GPIO pin configuration for the sensors and MOSFET
 CAMERA_SENSOR_TRIGGER_PIN = 23
