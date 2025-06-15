@@ -12,7 +12,7 @@ import time
 import json
 
 debug_mode = True  # Set to True to enable debug mode
-disable_sensors = True # Set to True to disable sensors
+disable_sensors = False # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
@@ -151,7 +151,7 @@ def mosfet_controller():
                 set_mosfet_state(MOSFET_OFF)
             elif current_state == MOSFET_PULSE:
                 print("MOSFET state: PULSE")
-                mosfet.pulse_smooth_with_range(duration=5, steps=200, min_brightness=0.6, max_brightness=1)
+                mosfet.pulse_smooth_with_range(duration=10, steps=200, min_brightness=0.3, max_brightness=1)
             elif current_state == MOSFET_OFF:
                 print("MOSFET state: OFF")
                 mosfet.set_pwm(0)  # Set brightness to 0%
@@ -245,7 +245,8 @@ def set_state(new_state):
     elif current_state == ROOM_STATE:
         set_mosfet_state(MOSFET_OFF)  # Set MOSFET to pulse state
         eel.startAnimationTopRoom()
-        eel.startAnimationSideRoom()
+        triggerCameraMovePY(0.004, 0.5)  # Move camera to room position
+        #eel.startAnimationSideRoom()
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
@@ -265,7 +266,13 @@ def set_state(new_state):
         current_time = datetime.now().strftime("%d.%m.%Y, %H:%M:%S")
         eel.updateModelInfoText(current_time, total_submissions)
 
-   
+@eel.expose
+def trigger_Animation_Side_Room():
+    """
+    Trigger the side animation for the room state.
+    """
+    print("Triggering side animation for ROOM_STATE...")
+    eel.startAnimationSideRoom()
 
 @eel.expose
 def get_state():

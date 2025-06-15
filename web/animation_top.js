@@ -197,7 +197,10 @@ let timeline;
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
-      display: "flex", // Ensure it is displayed
+      display: "flex",
+      onStart: () => {
+        eel.trigger_Animation_Side_Room();
+      },
     })
     .to("#room-animation-6", {
       opacity: 1, // Keep visible
@@ -214,7 +217,10 @@ let timeline;
       opacity: 1, // Fade in
       duration: TEXT_FADE_IN, // Duration of fade-in
       ease: "power2.out",
-      display: "flex", // Ensure it is displayed
+      display: "flex",
+      onStart: () => {
+        eel.set_mosfet_state("blink"); // Call the Python function to change the MOSFET state
+      }, // Ensure it is displayed
     })
     .to("#room-animation-7", {
       opacity: 1, // Keep visible

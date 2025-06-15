@@ -53,16 +53,7 @@ let timeline;
 
     document.getElementById("room-animation").style.display = "flex";
 
-    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
-  
-    timeline.to("#placeholder", {
-      opacity: 1, // Fade in
-      duration: WAIT_TIME_ROOM, // Duration of fade-in
-      ease: "power2.out",
-      onStart: () => {
-        triggerCameraMove(0.004, 0.5); // Call the function from imagesprite.js
-      },
-    }) 
+    timeline = gsap.timeline(); // `repeat: -1` makes it loop infinitely
     
     // Animate the first element (#idle-animation-1)
     timeline.to("#room-animation-1", {
