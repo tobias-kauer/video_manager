@@ -137,6 +137,9 @@ def invert_image_to_latent(image_path, generator, latent_dim, device, num_steps=
     image = Image.open(image_path).convert("RGBA")  # Ensure the image is in RGBA format
     image_tensor = transform(image).unsqueeze(0).to(device)  # Add batch dimension
 
+    # Ensure the generator is on the correct device
+    generator = generator.to(device)
+
     # Initialize a random latent vector
     latent_vector = torch.randn(1, latent_dim, device=device, requires_grad=True)
 
@@ -164,7 +167,7 @@ def invert_image_to_latent(image_path, generator, latent_dim, device, num_steps=
         loss.backward()
         optimizer.step()
 
-        if step % 50 == 0:
+        if step % 10 == 0:
             print(f"Step {step}/{num_steps}, Loss: {loss.item()}")
 
     original_vector= latent_vector.detach()
@@ -368,6 +371,11 @@ def generate_dimensionality_reduction_visualization_with_similarity_analysis(
 
     return output
 
+def reset_model(generator):
+    """
+    Reset the generator model to ensure a clean state.
+    """
+    generator.apply(lambda m: m.reset_parameters() if hasattr(m, 'reset_parameters') else None)
 
 
 def modelviz_train(uuid):
@@ -377,6 +385,16 @@ def modelviz_train(uuid):
     print(f"Latent vector shape: {original_vector.shape}")
     print(f"Latent vector min: {original_vector.min()}, max: {original_vector.max()}")
     print(f"Latent vector values: {original_vector}")'''
+
+    #reset_model(dcgan_generator)
+
+    # Construct the image path dynamically
+    image_path = os.path.join(
+        "web", "videos", uuid, "processed_colour", "frame_0099_noBG_processed.png"
+    )
+
+    # Debug the constructed image path
+    print(f"Using image path: {image_path}")
 
     # Example Usage with PCA
     output = generate_dimensionality_reduction_visualization_with_similarity_analysis(

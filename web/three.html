@@ -31,29 +31,40 @@
   <div id="overlay" style="opacity: 1;">
     <div id="placeholder" style="display: none;"></div>
 
-    <div id="animation" class="animation-container" >
+    <div id="animation" class="animation-container" style="z-index: 1;" >
 
       <div id="room-animation" class="animation-container" style="display: none;">
-        <div id="room-animation-1" class="text-container" style="display: none; opacity: 0;" >
-          <h1 class="main-text-header" style="font-size: 120px;">THE FUTURE OF AI</h1>
-          <h1 class="main-text-header">BELONGS IN OUR HANDS</h1>
+        <div id="room-animation-1" class="text-container-side" style="display: none; opacity: 0;" >
+          <h1 class="main-text-header" style="font-size: 84px; line-height: 70px; ">THE FUTURE OF AI</h1>
+          <h1 class="main-text-header" style="font-size: 70px; line-height: 70px; ">BELONGS IN OUR HANDS</h1>
         </div>
   
-        <div id="room-animation-2" class="text-container" style="display: none; opacity: 0;">
-          <h1 class="main-text">this is the start of a collective democratice AI model</h1>
-          <h1 class="main-text">hold you hand underneath the light to train & join then model</h1>
+        <div id="room-animation-2" class="text-container-side" style="display: none; opacity: 0; background-color: rgba(255, 255, 255, 0.8); padding: 150px; gap: 32px">
+          <h1 class="small-text-side" style="font-size: 32px; line-height: 40px;">This is the start of a collective democratice AI model</h1>
+          <h1 class="small-text-side" style="font-size: 32px; line-height: 40px;">Hold you hand underneath the light to train & join then model</h1>
         </div>  
       </div>
 
-      <div id="camera-animation" class="animation-container" style="display: none; background-color: rgba(1,1,1,0.8);">
-        <div id="camera-animation-1" class="text-container" style="display: none; opacity: 0;">
-          <h1 class="main-text-header">Recording</h1>
+      <div id="camera-animation" class="animation-container" style="display: none; background-color: rgba(255, 255, 255, 0.8);">
+        <div id="camera-animation-1" class="text-container-side" style="display: none; opacity: 0;">
+          <h1 class="small-text-side">Recording Dataset</h1>
+        </div>
+      </div>
+
+      <div id="training-animation" class="animation-container" style="display: none; background-color: rgba(255, 255, 255, 0.8);">
+        <div id="training-animation-1" class="text-container-side" style="display: none; opacity: 0;">
+          <h1 class="small-text-side">Retraining the model</h1>
+          <h1 class="main-text">Can take up to 15 seconds</h1>
         </div>
       </div>
       
     </div>
 
     <div class="small-text-container">
+      <div id="visualization-animation-1" style="display: none; opacity:0; align-items: center; gap: 10px; flex-direction: row;">
+        <div style="width: 24px; height: 24px; background-color: red;"></div>
+        <span id="uuid-info" class="extra-small-text" style="color: black; text-align: end;" >increased influence of 125434 dataset</span>
+      </div>
       <div class="extra-small-text" id="model-info" style="color: black; text-align: end; ">last trained: 08.06.2025, 23:45:32 / submissions: 2034</div>
     </div>
   </div>
@@ -75,6 +86,14 @@
     }
 
     eel.expose(updateModelInfoText);
+
+    function updateUuidInfo(uuid) {
+      const modelInfoElement = document.getElementById("uuid-info");
+      const newText = `increased influence of ${uuid} dataset`;
+      modelInfoElement.textContent = newText;
+    }
+
+    eel.expose(updateUuidInfo);
 
   </script>
   

@@ -114,6 +114,8 @@ eel.expose(on_record_done);
 function on_record_done(uuid) {
   console.log("Recording finished: " + uuid);
   document.getElementById('camera-animation').style.display = 'none';
+  document.getElementById('live-view-container').style.display = 'none';
+
   document.getElementById('idle-animation').style.display = 'flex';
   eel.set_current_uuid(uuid)
   eel.process_frames(uuid); // Process the recording with the UUID

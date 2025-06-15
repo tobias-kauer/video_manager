@@ -9,13 +9,16 @@ from segment_display import *
 from model_visualizer import *
 from datetime import datetime
 import time
+import json
 
 debug_mode = True  # Set to True to enable debug mode
 disable_sensors = True # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 10  # Default duration in seconds
-VIDEO_LOCATION = "videos/"  # Directory to save videos
+VIDEO_LOCATION = "web/videos/"  # Directory to save videos
+
+BASE_SUBMISSIONS = 124  # Base number of submissions for the segment display
 
 # Threshold values for the sensors
 SENSOR_CAMERA_THRESHOLD = 20  # cm
@@ -48,7 +51,20 @@ MOSFET_ON = "on"
 
 current_mosfet_state = MOSFET_PULSE
 
-total_submissions = 124
+def count_entries():
+    json_file_path = "entries.json"
+
+    # Check if the file exists
+    if not os.path.exists(json_file_path):
+        print(f"{json_file_path} does not exist.")
+        return 0
+
+    # Load the file and count the entries
+    with open(json_file_path, "r") as json_file:
+        entries = json.load(json_file)
+        return len(entries)
+
+total_submissions = BASE_SUBMISSIONS + count_entries()  # Initialize total submissions with base value plus existing entries
 last_uuid = "000000"
 
 # Check if running on a Raspberry Pi
@@ -68,7 +84,7 @@ else:
 
 segmentDisplay.init_display()
 segmentDisplay.clear_display()
-segmentDisplay.display_number(124)
+segmentDisplay.display_number(total_submissions)
 
 # Initialize variables for debugging
 sensor_camera_value = 0
@@ -111,29 +127,16 @@ def mosfet_controller():
     """
     Continuously pulse the MOSFET in the background.
     """
+    previous_state = None
+
     while True:
-        if get_mosfet_state() == MOSEFET_BLINK:
-            mosfet.interrupt = True
-            while mosfet.is_running:  # Wait for the current operation to finish
-                time.sleep(0.1)
+        current_state = get_mosfet_state()
 
-            # Reset the interrupt flag for the next operation
-            mosfet.interrupt = False
-            mosfet.blink(on_time=0.5, off_time=0.5)
-        elif get_mosfet_state() == MOSFET_PULSE:
+        # Only interrupt and start a new operation if the state has changed
+        if current_state != previous_state:
+            print(f"MOSFET state changed from {previous_state} to {current_state}")
 
-            mosfet.interrupt = True
-            while mosfet.is_running:  # Wait for the current operation to finish
-                time.sleep(0.1)
-
-            # Reset the interrupt flag for the next operation
-            mosfet.interrupt = False
-
-            mosfet.pulse_smooth_with_range(duration=15, steps=200, min_brightness=0.4, max_brightness=1)
-            #mosfet.pulse_smooth(duration=20, steps=200)
-
-        elif get_mosfet_state() == MOSFET_OFF:
-
+            # Interrupt any running MOSFET operation
             mosfet.interrupt = True
             while mosfet.is_running:  # Wait for the current operation to finish
                 time.sleep(0.1)
@@ -141,27 +144,27 @@ def mosfet_controller():
             # Reset the interrupt flag for the next operation
             mosfet.interrupt = False
 
-            mosfet.set_pwm(0)
-        elif get_mosfet_state() == MOSFET_ON:
+            # Perform the operation based on the new state
+            if current_state == MOSEFET_BLINK:
+                print("MOSFET state: BLINK")
+                mosfet.blink(on_time=0.5, off_time=0.5)
+                set_mosfet_state(MOSFET_OFF)
+            elif current_state == MOSFET_PULSE:
+                print("MOSFET state: PULSE")
+                mosfet.pulse_smooth_with_range(duration=15, steps=200, min_brightness=0.4, max_brightness=1)
+            elif current_state == MOSFET_OFF:
+                print("MOSFET state: OFF")
+                mosfet.set_pwm(0)  # Set brightness to 0%
+            elif current_state == MOSFET_ON:
+                print("MOSFET state: ON")
+                mosfet.set_pwm(60)  # Set brightness to 60%
 
-            mosfet.interrupt = True
-            while mosfet.is_running:  # Wait for the current operation to finish
-                time.sleep(0.1)
+            # Update the previous state
+            previous_state = current_state
 
-            # Reset the interrupt flag for the next operation
-            mosfet.interrupt = False
+        # Sleep briefly to avoid excessive CPU usage
+        time.sleep(0.1)
 
-            mosfet.set_pwm(100)
-
-
-    '''while True:
-        if get_state() == IDLE_STATE:
-            mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.9)  # Pulsate from 0% to 100%
-        if get_state() == ROOM_STATE:
-            mosfet.pulse_smooth_with_range(duration=10, steps=100, min_brightness=0.3, max_brightness=0.7)  # Pulsate from 0% to 100%
-        if get_state() == CAMERA_STATE:
-            mosfet.blink(on_time=2, off_time=2)
-            mosfet.set_pwm(100)  # Set MOSFET to 100% brightness'''
 def display_controller():
 
     """
@@ -171,22 +174,28 @@ def display_controller():
     segmentDisplay.clear_display()  # Clear the display
 
     while True:
- 
         segmentDisplay.display_number(total_submissions)  # Display the total submissions
         time.sleep(2)
-        segmentDisplay.clear_display() 
+        segmentDisplay.clear_display()
+
+def update_total_submissions_display():
+    segmentDisplay.clear_display()
+    segmentDisplay.display_number(total_submissions)
+
 def start_training_thread():
     """
     Start the training process in a separate thread.
     """
     def training_task():
         print("Training started...")
-        modelviz_train(get_current_uuid)  # Replace with your actual training function
+        modelviz_train(get_current_uuid()) 
         print("Training completed. Switching to VISUALIZING_STATE.")
         set_state(VISUALIZING_STATE)  # Switch to VISUALIZING_STATE after training
 
     # Start the training task in a new thread
-    threading.Thread(target=training_task).start()
+    training_thread = threading.Thread(target=training_task)
+    training_thread.start()
+    training_thread.join()  # Wait for the thread to finish
 
 @eel.expose
 def set_mosfet_state(new_state):
@@ -198,6 +207,7 @@ def set_mosfet_state(new_state):
     """
     global current_mosfet_state
     current_mosfet_state = new_state
+    mosfet.interrupt_task()  # Interrupt any ongoing MOSFET operation
     print(f"------------------------------------------------------------")
     print(f"MOSFET state changed to: {current_mosfet_state}")
     print(f"------------------------------------------------------------")
@@ -238,17 +248,21 @@ def set_state(new_state):
         print("Camera state detected. Starting recording...")
         eel.startRecordingEvent()
         eel.startAnimationSideCamera()
-        #set_state(IDLE_STATE)
     elif current_state == TRAINING_STATE:
+        eel.startAnimationSideTraining()
+        eel.updateTrainingImages()
+        eel.startAnimationTopTraining()
         start_training_thread()
         print("Training state detected. Starting training...")
     elif current_state == VISUALIZING_STATE:
+        eel.startAnimationSideVisualizing()
         print("Visualizing state detected. Starting model visualization...")
         eel.reloadSprites(True)
         current_time = datetime.now().strftime("%d.%m.%Y, %H:%M:%S")
         eel.updateModelInfoText(current_time, total_submissions)
 
-    
+   
+
 @eel.expose
 def get_state():
     """
@@ -262,9 +276,41 @@ def get_state():
 
 @eel.expose
 def set_current_uuid(uuid):
+
+    
     print(f"Setting current UUID to: {uuid}")
     global last_uuid
+    eel.updateUuidInfo(uuid)
     last_uuid = uuid
+
+    increase_submissions()  # Increment the total submissions count
+
+    # Define the path to the JSON file
+    json_file_path = "entries.json"
+
+    # Get the current timestamp
+    timestamp = datetime.now().strftime("%d.%m.%Y, %H:%M:%S")
+
+    # Create the new entry
+    new_entry = {"uuid": uuid, "timestamp": timestamp}
+
+    # Check if the JSON file exists
+    if not os.path.exists(json_file_path):
+        # Create the file and initialize it with an empty list
+        with open(json_file_path, "w") as json_file:
+            json.dump([new_entry], json_file, indent=4)
+        print(f"Created new JSON file: {json_file_path}")
+    else:
+        # Append the new entry to the existing file
+        with open(json_file_path, "r") as json_file:
+            entries = json.load(json_file)
+
+        entries.append(new_entry)
+
+        with open(json_file_path, "w") as json_file:
+            json.dump(entries, json_file, indent=4)
+        print(f"Updated JSON file: {json_file_path} with new entry.")
+
 
 @eel.expose
 def get_current_uuid():
@@ -274,8 +320,9 @@ def get_current_uuid():
 
 @eel.expose
 def increase_submissions():
-    global total_submissions
+    global total_submissions  
     total_submissions += 1
+    update_total_submissions_display()
 
 @eel.expose
 def get_total_submissions():
@@ -345,7 +392,7 @@ display_thread.start()
 set_state(IDLE_STATE)  # Set the initial state to IDLE
 
 eel.start('index.html', size=(800 , 600), block=False)
-eel.start('three.html', size=(720, 1000), block=False)
+eel.start('three.html', size=(1080, 1080), block=False)
 
 if debug_mode:
     eel.start('debug.html', size=(800, 600), block=False)

@@ -12,6 +12,9 @@ class Mosfet:
 
         self.current_pwm_value = None
 
+    def interrupt_task(self):
+        self.interrupt = True
+
     def on(self):
         """
         Turn the MOSFET on (full brightness).

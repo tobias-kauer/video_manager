@@ -14,7 +14,7 @@ scene.background = new THREE.Color(0xffffff); // Set background to white
 // Set up basic scene properties
 
 const scale = 0.3;
-const speed = 0.005;
+const speed = 0.001;
 const maxPoints = 1024;
 const selectedFile = 'data/tsne_images/tsne_output.json';
 

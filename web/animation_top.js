@@ -19,6 +19,9 @@ let timeline;
     document.getElementById("idle-animation").style.display = "none"; 
     document.getElementById("room-animation").style.display = "none"; 
     document.getElementById("camera-animation").style.display = "none";
+    document.getElementById("training-animation").style.display = "none";
+
+    
     
     const elementsToReset = [
       document.getElementById("idle-animation-1"),
@@ -225,6 +228,34 @@ let timeline;
     });
   
   }
+  function startAnimationTopTraining() {
+
+    resetAnimation();
+    document.getElementById("training-animation").style.display = "flex";
+    
+    // Create a GSAP timeline
+    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+  
+    // Animate the first element (#idle-animation-1)
+    timeline.to("#training-animation-1", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN/2, // Duration of fade-in
+      ease: "power2.out",
+    })
+    .to("#training-animation-1", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION/6, // Duration to stay visible
+    })
+    .to("#training-animation-1", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT/2, // Duration of fade-out
+      ease: "power2.in",
+    });
+
+  }
+
+
+
 
   function resetScrollPosition() {
     const list1 = document.getElementById("scroll-list-1");
@@ -298,6 +329,7 @@ let timeline;
   // Expose to Python
   eel.expose(startAnimationTopIdle);
   eel.expose(startAnimationTopRoom);
+  eel.expose(startAnimationTopTraining);
   
   // Optionally trigger on load
   window.onload = () => {

@@ -16,7 +16,7 @@ from platform_manager import is_raspberry_pi
 CAMERA = 0  # Default camera index (0 for the first camera)
 RESOLUTION = (640, 480)  # Default resolution
 DURATION = 12  # Default duration in seconds
-DEFAULT_LOCATION = "videos/"  # Directory to save videos
+DEFAULT_LOCATION = "web/videos/"  # Directory to save videos
 OUTOUT_IMAGE_SIZE = 480  # Size for square output images
 CAMERA_ACTIVATION_DELAY = 3  # Time in seconds to wait for the camera to activate
 

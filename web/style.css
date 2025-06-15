@@ -48,19 +48,30 @@ body, html {
   }
 
   .text-container {
-    width: 100%;
-    max-width: 1520px; 
-    height: 100%;
-    max-height: 1080px;
     margin-left: 200px; 
     margin-right: 200px; 
     left: 0px; 
-    top: 0px; 
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
     position: absolute;
     flex-direction: column; 
     justify-content: center; 
     align-items: flex-start; 
     gap: 30px; 
+    display: inline-flex"
+  }
+
+  .text-container-side {
+    left: 0px; 
+    top: 0px;
+    bottom: 0px;
+    right: 0px;
+    position: absolute;
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: flex-start; 
+    gap: 10px; 
     display: inline-flex"
   }
 
@@ -132,6 +143,24 @@ body, html {
     margin: 0px;
 
     color: white; 
+    font-size: 24px; 
+    font-family: IBM Plex Mono; 
+    font-weight: 500; 
+    line-height: 26.40px; 
+    word-wrap: break-word
+  }
+
+  .small-text-side {
+    width: 100%;
+    align-self: stretch; 
+    text-align: center; 
+    justify-content: center; 
+    display: flex; 
+    flex-direction: column; 
+    padding: 0px;
+    margin: 0px;
+
+    color: black; 
     font-size: 24px; 
     font-family: IBM Plex Mono; 
     font-weight: 500; 

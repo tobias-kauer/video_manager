@@ -5,7 +5,7 @@ const TEXT_FADE_OUT = 1;
 const TEXT_STAY_DURATION = 3;
 const EASE = "power2.out";
 
-const WAIT_TIME_ROOM = (TEXT_FADE_IN+TEXT_STAY_DURATION+TEXT_FADE_OUT)*6;
+const WAIT_TIME_ROOM = (TEXT_FADE_IN+TEXT_STAY_DURATION+TEXT_FADE_OUT)*5;
 
 let timeline;
 
@@ -22,10 +22,14 @@ let timeline;
     //document.getElementById("idle-animation").style.display = "none"; 
     document.getElementById("room-animation").style.display = "none"; 
     document.getElementById("camera-animation").style.display = "none";
+    document.getElementById("training-animation").style.display = "none";
     
     const elementsToReset = [
       document.getElementById("room-animation-1"),
       document.getElementById("room-animation-2"),
+      document.getElementById("camera-animation-1"),
+      document.getElementById("training-animation-1"),
+      document.getElementById("visualization-animation-1"),
     ];
     
     elementsToReset.forEach((element) => {
@@ -56,7 +60,7 @@ let timeline;
       duration: WAIT_TIME_ROOM, // Duration of fade-in
       ease: "power2.out",
       onStart: () => {
-        triggerCameraMove(0.005, 0.5); // Call the function from imagesprite.js
+        triggerCameraMove(0.004, 0.5); // Call the function from imagesprite.js
       },
     }) 
     
@@ -126,6 +130,74 @@ let timeline;
     });
 
   }
+  function startAnimationSideTraining() {
+
+    resetAnimation();
+    document.getElementById("training-animation").style.display = "flex";
+    
+    // Create a GSAP timeline
+    timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+  
+    // Animate the first element (#idle-animation-1)
+    timeline.to("#training-animation-1", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN/2, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex", // Ensure it is displayed
+    })
+    .to("#training-animation-1", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION/6, // Duration to stay visible
+    })
+    .to("#training-animation-1", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT/2, // Duration of fade-out
+      ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });
+
+  }
+  function startAnimationSideVisualizing() {
+
+    resetAnimation();
+
+    console.log("Starting visualization animation");
+
+    // Ensure the visualization element is visible
+    const visualizationElement = document.getElementById("visualization-animation-1");
+    if (!visualizationElement) {
+        console.error("Element #visualization-animation-1 not found!");
+        return;
+    }
+
+    visualizationElement.style.display = "flex";
+    visualizationElement.style.opacity = 1;
+
+    triggerCameraMove(0.001, 5);
+
+    /*
+    timeline.to("#visualization-animation-1", {
+      opacity: 1, // Fade in
+      duration: TEXT_FADE_IN, // Duration of fade-in
+      ease: "power2.out",
+      display: "flex",
+      onStart: () => {
+        triggerCameraMove(0.5, 5); // Call the function from imagesprite.js
+      }, // Ensure it is displayed
+    })
+    .to("#visualization-animation-1", {
+      opacity: 1, // Keep visible
+      duration: TEXT_STAY_DURATION*3, // Duration to stay visible
+    })
+    .to("#visualization-animation-1", {
+      opacity: 0, // Fade out
+      duration: TEXT_FADE_OUT, // Duration of fade-out
+      ease: "power2.in",
+      display: "none", // Hide it after fading out
+    });*/
+    
+  }
+
 
   
   
@@ -133,6 +205,8 @@ let timeline;
   eel.expose(startAnimationSideIdle);
   eel.expose(startAnimationSideRoom);
   eel.expose(startAnimationSideCamera);
+  eel.expose(startAnimationSideTraining);
+  eel.expose(startAnimationSideVisualizing);
   
   // Optionally trigger on load
   /*
