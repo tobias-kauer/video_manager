@@ -49,7 +49,7 @@ MOSFET_PULSE = "pulse"
 MOSFET_OFF = "off"
 MOSFET_ON = "on"
 
-current_mosfet_state = MOSFET_PULSE
+current_mosfet_state = None
 
 def count_entries():
     json_file_path = "entries.json"
@@ -147,7 +147,6 @@ def mosfet_controller():
             if current_state == MOSEFET_BLINK:
                 print("MOSFET state: BLINK")
                 mosfet.blink(on_time=0.5, off_time=0.5)
-                set_mosfet_state(MOSFET_OFF)
             elif current_state == MOSFET_PULSE:
                 print("MOSFET state: PULSE")
                 mosfet.pulse_smooth_with_range(duration=10, steps=200, min_brightness=0.3, max_brightness=1)
@@ -398,7 +397,6 @@ display_thread.start()
 
 
 set_state(IDLE_STATE)  # Set the initial state to IDLE
-set_mosfet_state(MOSFET_PULSE)
 
 eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(1080, 1080), block=False)
