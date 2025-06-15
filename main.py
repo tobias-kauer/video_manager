@@ -118,7 +118,6 @@ def monitor_sensors():
             # Check if Sensor Camera is within range or manually triggered
             if sensorCamera.is_object_within_range(SENSOR_CAMERA_THRESHOLD):
                 print(f"Sensor Camera triggered! Distance: {sensorCamera.get_distance():.2f} cm")
-
                 set_state(CAMERA_STATE)  # Change state to CAMERA_STATE
 
         time.sleep(0.5)  # Adjust the polling interval as needed
@@ -207,7 +206,7 @@ def set_mosfet_state(new_state):
     """
     global current_mosfet_state
     current_mosfet_state = new_state
-    mosfet.interrupt_task()  # Interrupt any ongoing MOSFET operation
+    #mosfet.interrupt_task()  # Interrupt any ongoing MOSFET operation
     print(f"------------------------------------------------------------")
     print(f"MOSFET state changed to: {current_mosfet_state}")
     print(f"------------------------------------------------------------")
@@ -243,14 +242,14 @@ def set_state(new_state):
         eel.startAnimationSideIdle()
         eel.reloadSprites(False)
     elif current_state == ROOM_STATE:
-        set_mosfet_state(MOSFET_OFF)  # Set MOSFET to pulse state
+        set_mosfet_state(MOSFET_OFF)  # but later blinking
         eel.startAnimationTopRoom()
         triggerCameraMovePY(0.004, 0.5)  # Move camera to room position
         #eel.startAnimationSideRoom()
     elif current_state == CAMERA_STATE:
         print("Camera state detected. Starting recording...")
-        eel.startRecordingEvent()
         set_mosfet_state(MOSFET_ON)  # Set MOSFET to pulse state
+        eel.startRecordingEvent()
         eel.startAnimationSideCamera()
     elif current_state == TRAINING_STATE:
         eel.startAnimationSideTraining()
@@ -322,7 +321,6 @@ def set_current_uuid(uuid):
             json.dump(entries, json_file, indent=4)
         print(f"Updated JSON file: {json_file_path} with new entry.")
 
-
 @eel.expose
 def get_current_uuid():
     global last_uuid
@@ -348,7 +346,6 @@ def triggerCameraMovePY(move_speed, target_position):
     """
     print("Camera move triggered from Python!")
     return eel.triggerCameraMove(move_speed, target_position)  # Calls the JS function
-
 
 @eel.expose
 def record_data():
