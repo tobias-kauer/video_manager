@@ -157,7 +157,7 @@ def mosfet_controller():
                 mosfet.set_pwm(0)  # Set brightness to 0%
             elif current_state == MOSFET_ON:
                 print("MOSFET state: ON")
-                mosfet.set_pwm(60)  # Set brightness to 60%
+                mosfet.set_pwm(100)  # Set brightness to 60%
 
             # Update the previous state
             previous_state = current_state
