@@ -164,7 +164,7 @@
       <div id="visualization-animation-1" class="text-container" style="display: none; opacity: 0;">
         <h1 class="medium-text" style="font-size: 46;">Your token is 142342</h1>
         <h1 class="medium-text">Safe it to decide about the model in the future.</h1>
-        <div id="image-grid-container" style="display: flex; flex-direction: row; justify-content: center; position: relative; gap: 20px; padding-top: 20px;">
+        <div id="image-grid-container" style="display: flex; flex-direction: row; justify-content: center; align-items: center; position: relative; gap: 20px; padding-top: 20px;">
           <!-- Grids will be dynamically added here -->
         </div>
         <h1 class="medium-text">See the impact your training data had, marked in read on the model screen</h1>
@@ -183,7 +183,7 @@
 
     <script>
       
-      function generateImageGrid(gridRows = 2, gridColumns = 2, foldersToShow = ["unprocessed", "noBG", "processedColour"]) {
+      function generateImageGrid(gridRows = 4, gridColumns = 10, foldersToShow = ["unprocessed"]) {
         // Fetch the current UUID from Python
         eel.get_current_uuid()().then((uuid) => {
           if (!uuid) {
@@ -242,11 +242,12 @@
 
             // Create image elements for the grid
             for (let i = 0; i < totalImages; i++) {
+              const frameIndex = i * 5;
               const img = document.createElement("img");
               img.style.width = "60px"; // Set image width
               img.style.height = "60px"; // Set image height
               img.style.objectFit = "cover"; // Ensure the images are cropped properly
-              const imagePath = `${basePaths[key]}frame_${String(i).padStart(4, "0")}${fileSuffixes[key]}`;
+              const imagePath = `${basePaths[key]}frame_${String(frameIndex).padStart(4, "0")}${fileSuffixes[key]}`;
               img.src = imagePath;
 
               // Handle image load errors
