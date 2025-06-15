@@ -230,7 +230,11 @@ let timeline;
       opacity: 0, // Fade out
       duration: TEXT_FADE_OUT, // Duration of fade-out
       ease: "power2.in",
-      display: "none", // Hide it after fading out
+      display: "none",
+      onComplete: () => {
+        eel.set_mosfet_state("off");
+        eel.set_state("idle") // Call the Python function to turn off the MOSFET
+      }, // Hide it after fading out
     });
   
   }

@@ -126,7 +126,7 @@ def mosfet_controller():
     """
     Continuously pulse the MOSFET in the background.
     """
-    previous_state = "pulse"
+    previous_state = None
 
     while True:
         current_state = get_mosfet_state()
@@ -398,7 +398,6 @@ display_thread.start()
 
 
 set_state(IDLE_STATE)  # Set the initial state to IDLE
-set_mosfet_state(MOSFET_OFF)
 set_mosfet_state(MOSFET_PULSE)
 
 eel.start('index.html', size=(800 , 600), block=False)
