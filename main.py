@@ -206,7 +206,7 @@ def set_mosfet_state(new_state):
     """
     global current_mosfet_state
     current_mosfet_state = new_state
-    #mosfet.interrupt_task()  # Interrupt any ongoing MOSFET operation
+    mosfet.interrupt_task()  # Interrupt any ongoing MOSFET operation
     print(f"------------------------------------------------------------")
     print(f"MOSFET state changed to: {current_mosfet_state}")
     print(f"------------------------------------------------------------")
@@ -398,6 +398,8 @@ display_thread.start()
 
 
 set_state(IDLE_STATE)  # Set the initial state to IDLE
+set_mosfet_state(MOSFET_OFF)
+set_mosfet_state(MOSFET_PULSE)
 
 eel.start('index.html', size=(800 , 600), block=False)
 eel.start('three.html', size=(1080, 1080), block=False)
