@@ -11,7 +11,7 @@ function startRecordingEvent() {
     startPreRecordingCountdown(3, () => {
 
       document.getElementById('live-view-container').style.display = 'flex';
-      startRecordingCountdown(RECORDING_DURATION);
+      startRecordingCountdown(RECORDING_DURATION-2);
     });
   }
 
