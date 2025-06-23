@@ -12,6 +12,7 @@ import numpy as np
 from PIL import Image
 #import io
 import json
+import time
 #from pathlib import Path
 
 
@@ -400,12 +401,14 @@ def modelviz_train(uuid):
     output = generate_dimensionality_reduction_visualization_with_similarity_analysis(
         dcgan_generator, 
         latent_dim=LATENT_DIM, 
-        num_samples=256, 
+        num_samples=128, 
         reduction_method="pca", 
         output_folder=OUTPUT_FOLDER, 
         use_base64=False, 
         output_json=OUTPUT_FILE,
         similarity_vector=invert_image_to_latent(image_path, dcgan_generator, LATENT_DIM, DEVICE),
-        batch_size=256,
+        batch_size=128,
         overwrite=False
     )
+
+    #time.sleep(20)  # Simulate some processing time

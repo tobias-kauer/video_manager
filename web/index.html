@@ -153,12 +153,18 @@
 
     <div id="training-animation" class="animation-container" style="display:none;">
 
-      <div id="training-animation-1" class="text-container" style="display: none; opacity: 0;">
-        <h1 class="medium-text">Re-training the model<br>This can take up to 20 seconds</h1>
-        <!--
-        <div id="training-images-container" style="display: flex; justify-content: center; gap: 20px; padding-top: 20px;">
-        </div>-->
+      <div id="training-animation-1" class="text-container" style="display: none; opacity: 0; gap: 8px;">
+        <h1 id="training-animation-1a" class="medium-text" style=" display: flex;">Re-training the model</h1>
+        <h1 id="training-animation-1b" class="medium-text" style=" display: flex; font-size: 18px;">This can take up to 20 seconds</h1>
+        <h1 id="training-animation-1c" class="medium-text" style=" display: flex; font-size: 24px;"><br>Once training is complete, you will receive a unique token.<br>
+          This token represents your stake in the model.<br>
+          Keep it safe — it gives you a say in future development and decisions regarding your data.<br><br>
+          For more information, contact: latentcollective@protonmail.com (A website is coming soon.)<br>
+          </h1>
+
       </div>
+
+ 
     </div>
 
     <div id="visualization-animation" class="animation-container" style="display:none;">
@@ -252,7 +258,7 @@
 
             // Create image elements for the grid
             for (let i = 0; i < totalImages; i++) {
-              const frameIndex = i * 4;
+              const frameIndex = i * 3;
               const img = document.createElement("img");
               img.style.width = "60px"; // Set image width
               img.style.height = "60px"; // Set image height

@@ -11,7 +11,7 @@ from datetime import datetime
 import time
 import json
 
-debug_mode = True  # Set to True to enable debug mode
+debug_mode = True # Set to True to enable debug mode
 disable_sensors = False # Set to True to disable sensors
 
 RESOLUTION = (640, 480)  # Default resolution

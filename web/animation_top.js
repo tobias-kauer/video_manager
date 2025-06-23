@@ -248,25 +248,14 @@ let timeline;
     
     // Create a GSAP timeline
     timeline = gsap.timeline({ repeat: -1 }); // `repeat: -1` makes it loop infinitely
+
+    startLoadingAnimation();
+
+    document.getElementById("training-animation-1").style.display = "flex";
+    document.getElementById("training-animation-1").style.opacity = 1;
   
     // Animate the first element (#idle-animation-1)
-    timeline.to("#training-animation-1", {
-      opacity: 1, // Fade in
-      duration: TEXT_FADE_IN/2, // Duration of fade-in
-      ease: "power2.out",
-      display: "flex", // Ensure it is displayed
-    })
-    .to("#training-animation-1", {
-      opacity: 1, // Keep visible
-      duration: TEXT_STAY_DURATION/6, // Duration to stay visible
-    })
-    .to("#training-animation-1", {
-      opacity: 0, // Fade out
-      duration: TEXT_FADE_OUT/2, // Duration of fade-out
-      ease: "power2.in",
-      display: "none", // Hide it after fading out
-    });
-
+    
   }
   function startAnimationTopVisualizing() {
 
@@ -368,6 +357,29 @@ let timeline;
   function stopScrollingList() {
     // Stop the scrolling animation
     gsap.killTweensOf("#scroll-list");
+  }
+  function startLoadingAnimation() {
+    
+    const element = document.getElementById("training-animation-1a");
+    if (!element) {
+      console.error("Element #training-animation-1a not found!");
+      return;
+    }
+  
+    const spinnerChars = ["|", "/", "-", "\\"];
+    let index = 0;
+  
+    // Start the loading animation
+    const interval = setInterval(() => {
+      element.textContent = `Re-training the model ${spinnerChars[index]}`;
+      index = (index + 1) % spinnerChars.length; // Cycle through spinnerChars
+    }, 200); // Update every 200ms
+  
+    // Stop the animation when the element is hidden
+    element.onanimationend = () => {
+      clearInterval(interval);
+      element.textContent = ""; // Clear the text when animation ends
+    };
   }
   
   // Expose to Python
